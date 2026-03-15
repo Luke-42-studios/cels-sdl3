@@ -89,38 +89,38 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| FNDN-01 | | Pending |
-| FNDN-02 | | Pending |
-| FNDN-03 | | Pending |
-| FNDN-04 | | Pending |
-| FNDN-05 | | Pending |
-| FNDN-06 | | Pending |
-| INPT-01 | | Pending |
-| INPT-02 | | Pending |
-| INPT-03 | | Pending |
-| RNDR-01 | | Pending |
-| RNDR-02 | | Pending |
-| RNDR-03 | | Pending |
-| RNDR-04 | | Pending |
-| RNDR-05 | | Pending |
-| RNDR-06 | | Pending |
-| TXTR-01 | | Pending |
-| TXTR-02 | | Pending |
-| TXTR-03 | | Pending |
-| TEXT-01 | | Pending |
-| TEXT-02 | | Pending |
-| TEXT-03 | | Pending |
-| INTG-01 | | Pending |
-| INTG-02 | | Pending |
-| INTG-03 | | Pending |
-| INTG-04 | | Pending |
-| INTG-05 | | Pending |
+| FNDN-01 | Phase 1: SDL3 Bootstrap | Pending |
+| FNDN-02 | Phase 1: SDL3 Bootstrap | Pending |
+| FNDN-03 | Phase 2: Window Provider | Pending |
+| FNDN-04 | Phase 2: Window Provider | Pending |
+| FNDN-05 | Phase 3: Frame Loop | Pending |
+| FNDN-06 | Phase 3: Frame Loop | Pending |
+| INPT-01 | Phase 4: Input System | Pending |
+| INPT-02 | Phase 4: Input System | Pending |
+| INPT-03 | Phase 4: Input System | Pending |
+| RNDR-01 | Phase 5: Renderer Core | Pending |
+| RNDR-02 | Phase 5: Renderer Core | Pending |
+| RNDR-03 | Phase 6: Draw Primitives | Pending |
+| RNDR-04 | Phase 6: Draw Primitives | Pending |
+| RNDR-05 | Phase 6: Draw Primitives | Pending |
+| RNDR-06 | Phase 6: Draw Primitives | Pending |
+| TXTR-01 | Phase 7: Textures | Pending |
+| TXTR-02 | Phase 7: Textures | Pending |
+| TXTR-03 | Phase 7: Textures | Pending |
+| TEXT-01 | Phase 8: Text Rendering | Pending |
+| TEXT-02 | Phase 8: Text Rendering | Pending |
+| TEXT-03 | Phase 8: Text Rendering | Pending |
+| INTG-01 | Phase 9: Module Integration | Pending |
+| INTG-02 | Phase 9: Module Integration | Pending |
+| INTG-03 | Phase 9: Module Integration | Pending |
+| INTG-04 | Phase 9: Module Integration | Pending |
+| INTG-05 | Phase 10: Example Application | Pending |
 
 **Coverage:**
 - v1 requirements: 26 total
-- Mapped to phases: 0
-- Unmapped: 26
+- Mapped to phases: 26
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-15*
-*Last updated: 2026-03-15 after initial definition*
+*Last updated: 2026-03-15 after roadmap creation*
