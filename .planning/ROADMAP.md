@@ -34,11 +34,11 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. Consumer project can include cels-sdl3 headers and link against the INTERFACE library target
   3. SDL3 initializes with VIDEO and EVENTS subsystem flags, plus SDL3_image and SDL3_ttf library init
   4. SDL3 shuts down cleanly in correct reverse order (SDL3_ttf, SDL3_image, SDL_Quit) with no resource leaks
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] 01-01: TBD
-- [ ] 01-02: TBD
+- [ ] 01-01-PLAN.md -- CMake scaffold, INTERFACE library, public header, module and init/shutdown implementation
+- [ ] 01-02-PLAN.md -- Minimal example app, full build and run verification
 
 ### Phase 2: Window Provider
 **Goal**: Developer can create one or more windows as ECS entities, each with a full lifecycle state machine tracking its current state
@@ -183,7 +183,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. SDL3 Bootstrap | 0/TBD | Not started | - |
+| 1. SDL3 Bootstrap | 0/2 | Planned | - |
 | 2. Window Provider | 0/TBD | Not started | - |
 | 3. Frame Loop | 0/TBD | Not started | - |
 | 4. Input System | 0/TBD | Not started | - |
