@@ -1,0 +1,86 @@
+# cels-sdl3 - SDL3-based providers for CELS framework
+# INTERFACE library: sources compile in the consumer's context
+cmake_minimum_required(VERSION 3.21)
+project(cels-sdl3 VERSION 0.1.0 LANGUAGES C)
+
+# ============================================================================
+# Dependencies
+# ============================================================================
+# cels-sdl3 is an addon library -- the consumer must provide cels.
+# Typical consumer CMakeLists.txt:
+#
+#   FetchContent_Declare(cels
+#       GIT_REPOSITORY https://github.com/42-Galaxies/cels.git
+#       GIT_TAG        v0.5.3)
+#   FetchContent_Declare(cels-sdl3
+#       GIT_REPOSITORY https://github.com/42-Galaxies/cels-sdl3.git
+#       GIT_TAG        v0.1.0)
+#   FetchContent_MakeAvailable(cels cels-sdl3)
+#
+#   target_link_libraries(your_app PRIVATE cels cels-sdl3)
+#
+if(NOT TARGET cels)
+    if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+        # Top-level build (development) -- use sibling cels directory
+        # Point FetchContent at cels's already-downloaded deps to avoid network clones
+        set(FETCHCONTENT_SOURCE_DIR_FLECS
+            "${CMAKE_CURRENT_SOURCE_DIR}/../cels/cmake-build-debug/_deps/flecs-src" CACHE PATH "")
+        set(FETCHCONTENT_SOURCE_DIR_YYJSON
+            "${CMAKE_CURRENT_SOURCE_DIR}/../cels/cmake-build-debug/_deps/yyjson-src" CACHE PATH "")
+        add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../cels cels)
+    else()
+        message(FATAL_ERROR
+            "cels-sdl3 requires the 'cels' target. "
+            "Add cels via FetchContent or add_subdirectory before cels-sdl3.")
+    endif()
+endif()
+
+# SDL3 ecosystem -- FetchContent only (no system package fallback)
+include(FetchContent)
+
+FetchContent_Declare(SDL3
+    GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
+    GIT_TAG        release-3.4.2
+    GIT_SHALLOW    TRUE
+)
+FetchContent_Declare(SDL3_image
+    GIT_REPOSITORY https://github.com/libsdl-org/SDL_image.git
+    GIT_TAG        release-3.4.0
+    GIT_SHALLOW    TRUE
+)
+FetchContent_Declare(SDL3_ttf
+    GIT_REPOSITORY https://github.com/libsdl-org/SDL_ttf.git
+    GIT_TAG        release-3.2.2
+    GIT_SHALLOW    TRUE
+)
+FetchContent_MakeAvailable(SDL3 SDL3_image SDL3_ttf)
+
+# ============================================================================
+# INTERFACE library target
+# ============================================================================
+add_library(cels-sdl3 INTERFACE)
+
+target_sources(cels-sdl3 INTERFACE
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/sdl3_module.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/sdl3_init.c
+)
+
+target_include_directories(cels-sdl3 INTERFACE
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
+
+target_link_libraries(cels-sdl3 INTERFACE
+    SDL3::SDL3
+    SDL3_image::SDL3_image
+    SDL3_ttf::SDL3_ttf
+    cels
+)
+
+# ============================================================================
+# Examples (only when building this repo directly)
+# ============================================================================
+if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+    add_executable(minimal examples/minimal/main.c)
+    target_link_libraries(minimal PRIVATE cels-sdl3)
+    set_target_properties(minimal PROPERTIES C_STANDARD 99 C_STANDARD_REQUIRED ON)
+endif()
