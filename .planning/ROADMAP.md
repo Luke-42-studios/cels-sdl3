@@ -32,8 +32,8 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Success Criteria** (what must be TRUE):
   1. CMakeLists.txt builds successfully, fetching SDL3, SDL3_image, and SDL3_ttf via FetchContent (or system packages)
   2. Consumer project can include cels-sdl3 headers and link against the INTERFACE library target
-  3. SDL3 initializes with VIDEO and EVENTS subsystem flags, plus SDL3_image and SDL3_ttf library init
-  4. SDL3 shuts down cleanly in correct reverse order (SDL3_ttf, SDL3_image, SDL_Quit) with no resource leaks
+  3. SDL3 initializes with VIDEO subsystem flag and SDL3_ttf via TTF_Init (SDL3_image auto-initializes, no explicit init needed)
+  4. SDL3 shuts down cleanly in correct reverse order (TTF_Quit then SDL_Quit; SDL3_image has no quit function) with no resource leaks
 **Plans:** 2 plans
 
 Plans:
