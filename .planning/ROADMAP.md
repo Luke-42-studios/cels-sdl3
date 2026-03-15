@@ -49,11 +49,11 @@ Plans:
   2. Window responds to minimize, resize, and close events by transitioning to MINIMIZED, RESIZING, or CLOSING -> CLOSED states
   3. Multiple window entities can coexist, each with its own SDL_Window and independent state machine
   4. Window component is queryable via standard CELS ECS queries
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] 02-01: TBD
-- [ ] 02-02: TBD
+- [ ] 02-01-PLAN.md -- Window types, creation/destruction logic, module wiring, and CMake update
+- [ ] 02-02-PLAN.md -- Multi-window example app with lifecycle verification
 
 ### Phase 3: Frame Loop
 **Goal**: Developer has a running frame loop that pumps SDL events, ticks the ECS, and produces accurate delta time each frame
@@ -183,8 +183,8 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. SDL3 Bootstrap | 2/2 | ✓ Complete | 2026-03-15 |
-| 2. Window Provider | 0/TBD | Not started | - |
+| 1. SDL3 Bootstrap | 2/2 | Complete | 2026-03-15 |
+| 2. Window Provider | 0/2 | Planned | - |
 | 3. Frame Loop | 0/TBD | Not started | - |
 | 4. Input System | 0/TBD | Not started | - |
 | 5. Renderer Core | 0/TBD | Not started | - |
