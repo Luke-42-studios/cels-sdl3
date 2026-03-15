@@ -31,6 +31,16 @@ void sdl3_window_create(cels_entity_t entity,
         return;
     }
 
+    /* Commit an initial surface buffer so Wayland compositors display the window,
+     * then explicitly show it. Without a committed buffer, Wayland will
+     * not composite the window even though SDL marks it as "shown". */
+    SDL_Surface* surface = SDL_GetWindowSurface(window);
+    if (surface) {
+        SDL_FillSurfaceRect(surface, NULL, SDL_MapSurfaceRGB(surface, 0, 0, 0));
+        SDL_UpdateWindowSurface(window);
+    }
+    SDL_ShowWindow(window);
+
     /* Build runtime component.
      * State advances synchronously: NONE -> CREATED -> SURFACE_READY -> READY.
      * SURFACE_READY is an instant pass-through for the SDL_Renderer path

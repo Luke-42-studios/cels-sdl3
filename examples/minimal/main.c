@@ -86,8 +86,9 @@ static int s_frames = 0;
 CEL_System(FrameCounter, .phase = OnUpdate) {
     cel_run {
         s_frames++;
-        if (s_frames >= 5) {
-            cels_request_quit();
+        SDL_Delay(16);  /* ~60 fps pacing */
+        if (s_frames >= 180) {  /* ~3 seconds visible */
+            cels_quit();
         }
     }
 }
