@@ -12,7 +12,7 @@ cels-sdl3 delivers an SDL3 backend module for the CELS declarative ECS framework
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: SDL3 Bootstrap** - CMake scaffold, SDL3 FetchContent, init/shutdown lifecycle
+- [x] **Phase 1: SDL3 Bootstrap** - CMake scaffold, SDL3 FetchContent, init/shutdown lifecycle
 - [ ] **Phase 2: Window Provider** - Window creation as ECS entity with full lifecycle state machine
 - [ ] **Phase 3: Frame Loop** - CELS-integrated frame loop with delta time and event pumping
 - [ ] **Phase 4: Input System** - Event buffering, raw queue as ECS component, window event routing
@@ -37,8 +37,8 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans:** 2 plans
 
 Plans:
-- [ ] 01-01-PLAN.md -- CMake scaffold, INTERFACE library, public header, module and init/shutdown implementation
-- [ ] 01-02-PLAN.md -- Minimal example app, full build and run verification
+- [x] 01-01-PLAN.md -- CMake scaffold, INTERFACE library, public header, module and init/shutdown implementation
+- [x] 01-02-PLAN.md -- Minimal example app, full build and run verification
 
 ### Phase 2: Window Provider
 **Goal**: Developer can create one or more windows as ECS entities, each with a full lifecycle state machine tracking its current state
@@ -183,7 +183,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. SDL3 Bootstrap | 0/2 | Planned | - |
+| 1. SDL3 Bootstrap | 2/2 | ✓ Complete | 2026-03-15 |
 | 2. Window Provider | 0/TBD | Not started | - |
 | 3. Frame Loop | 0/TBD | Not started | - |
 | 4. Input System | 0/TBD | Not started | - |
