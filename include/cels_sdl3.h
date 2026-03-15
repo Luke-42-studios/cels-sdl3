@@ -18,6 +18,7 @@
 #ifndef CELS_SDL3_H
 #define CELS_SDL3_H
 #include <cels/cels.h>
+#include <SDL3/SDL.h>
 #include <stdbool.h>
 
 CEL_Module(SDL3_Engine);
@@ -71,5 +72,77 @@ CEL_Define_Composition(SDL3Context, bool video;);
 
 /* Call macro for natural syntax */
 #define SDL3Context(...) cel_init(SDL3Context, __VA_ARGS__)
+
+/* ============================================================================
+ * Window Types
+ * ============================================================================ */
+
+/*
+ * Window lifecycle state machine.
+ *
+ * Creation chain (synchronous): NONE -> CREATED -> SURFACE_READY -> READY
+ * Close chain (one-frame delay): READY -> CLOSING -> CLOSED
+ * Minimize/restore: READY -> MINIMIZED -> SURFACE_READY -> READY
+ * Resize: READY -> RESIZING -> READY (when stable)
+ */
+typedef enum SDL3_WindowState {
+    SDL3_WINDOW_NONE = 0,
+    SDL3_WINDOW_CREATED,
+    SDL3_WINDOW_SURFACE_READY,
+    SDL3_WINDOW_READY,
+    SDL3_WINDOW_RESIZING,
+    SDL3_WINDOW_MINIMIZED,
+    SDL3_WINDOW_CLOSING,
+    SDL3_WINDOW_CLOSED
+} SDL3_WindowState;
+
+/*
+ * Developer sets this on an entity to configure window creation.
+ *
+ *   SDL3Window(.title = "My Game", .width = 800, .height = 600) {}
+ *
+ * Defaults: 1280x720, resizable, empty title, no special flags.
+ */
+CEL_Component(SDL3_WindowConfig) {
+    const char*     title;
+    int             width;
+    int             height;
+    SDL_WindowFlags flags;
+};
+
+/*
+ * Runtime window state -- attached by lifecycle observer after creation.
+ * Read via cel_watch(entity, SDL3_WindowComponent) in consumer systems.
+ *
+ * The SDL_Window* is exposed for advanced users who need direct SDL3 access.
+ */
+CEL_Component(SDL3_WindowComponent) {
+    SDL_Window*      window;
+    SDL_WindowID     window_id;
+    SDL3_WindowState state;
+    int              width;
+    int              height;
+};
+
+/* ============================================================================
+ * Composition: SDL3Window
+ * ============================================================================
+ *
+ * Creates a window entity with natural syntax:
+ *
+ *   SDL3Window(.title = "My Game", .width = 800, .height = 600) {}
+ *   SDL3Window(.title = "Debug") {}  // gets 1280x720 default
+ *
+ * Implementation in sdl3_module.c via CEL_Composition(SDL3Window).
+ */
+CEL_Define_Composition(SDL3Window,
+    const char* title;
+    int width;
+    int height;
+    SDL_WindowFlags flags;
+);
+
+/* Call macro for natural syntax */
+#define SDL3Window(...) cel_init(SDL3Window, __VA_ARGS__)
 
 #endif /* CELS_SDL3_H */
