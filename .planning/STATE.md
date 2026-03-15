@@ -5,32 +5,33 @@
 See: .planning/PROJECT.md (updated 2026-03-15)
 
 **Core value:** Developers can build 2D graphical applications using the CELS framework with SDL3 as the backend, using the same declarative ECS patterns they know from cels-ncurses
-**Current focus:** Phase 1 verified complete -- ready for Phase 2 (Window Provider)
+**Current focus:** Phase 2 in progress -- Window Provider (plan 1 of 3 complete)
 
 ## Current Position
 
-Phase: 1 of 10 (SDL3 Bootstrap) -- VERIFIED ✓
-Plan: 2 of 2 in current phase (all complete)
-Status: Phase verified, goal achieved (4/4 must-haves passed)
-Last activity: 2026-03-15 -- Phase 1 verified: all success criteria confirmed against codebase
+Phase: 2 of 10 (Window Provider)
+Plan: 1 of 3 in current phase
+Status: In progress
+Last activity: 2026-03-15 -- Completed 02-01-PLAN.md (Window Provider core types, creation, lifecycle wiring)
 
-Progress: [██░░░░░░░░░░░░░░░░░] 10% (2/19 plans complete)
+Progress: [███░░░░░░░░░░░░░░░░] 15% (3/19 plans complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 2
-- Average duration: 3.5 min
-- Total execution time: 0.12 hours
+- Total plans completed: 3
+- Average duration: 3.3 min
+- Total execution time: 0.17 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-sdl3-bootstrap | 2/2 | 7 min | 3.5 min |
+| 02-window-provider | 1/3 | 3 min | 3 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (4 min), 01-02 (3 min)
+- Last 5 plans: 01-01 (4 min), 01-02 (3 min), 02-01 (3 min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -50,6 +51,10 @@ Recent decisions affecting current work:
 - [01-01]: Shutdown order: TTF_Quit then SDL_Quit (reverse of init order)
 - [01-02]: SDL_VIDEODRIVER=dummy works for headless testing -- SDL3 dummy video driver available
 - [01-02]: Consumer app pattern established: cels_main + cels_register + cels_session + cels_step
+- [02-01]: State chain NONE->CREATED->SURFACE_READY->READY advances synchronously during creation (SURFACE_READY instant pass-through for SDL_Renderer)
+- [02-01]: component_id passed explicitly from sdl3_module.c to sdl3_window.c (per-TU static ID constraint solution)
+- [02-01]: SDL_WINDOW_RESIZABLE ORed in at both composition and creation levels (borderless skips resizable)
+- [02-01]: CLOSING->CLOSED driven by per-frame state system (one frame delay for cleanup)
 
 ### Pending Todos
 
@@ -61,9 +66,10 @@ None.
 - [RESOLVED]: Build system verified end-to-end -- INTERFACE library compiles, links, and runs correctly
 - [Research]: SDL3_ttf text engine API may have changed significantly from SDL2_ttf (Phase 8)
 - [Research]: CELS framework macros (CEL_DefineModule, CEL_DefineFeature, CEL_Provides) need verification against current headers
+- [Note]: cels framework test_lifecycle_fsm has pre-existing build failure (missing header) -- does not affect cels-sdl3
 
 ## Session Continuity
 
-Last session: 2026-03-15 21:10 UTC
-Stopped at: Completed 01-02-PLAN.md -- Phase 1 complete
+Last session: 2026-03-15 23:13 UTC
+Stopped at: Completed 02-01-PLAN.md -- Window Provider core
 Resume file: None
