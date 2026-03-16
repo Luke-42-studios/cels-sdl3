@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-03-15)
 
 **Core value:** Developers can build 2D graphical applications using the CELS framework with SDL3 as the backend, using the same declarative ECS patterns they know from cels-ncurses
-**Current focus:** Phase 3 in progress -- Frame Loop (plan 01 of 02 complete)
+**Current focus:** Phase 3 in progress -- Frame Loop (plan 02 checkpoint pending)
 
 ## Current Position
 
 Phase: 3 of 10 (Frame Loop)
-Plan: 1 of 2 in current phase
-Status: In progress
-Last activity: 2026-03-16 -- Completed 03-01-PLAN.md (Frame loop core: delta time, event pump, frame state)
+Plan: 2 of 2 in current phase
+Status: In progress -- checkpoint:human-verify pending
+Last activity: 2026-03-16 -- 03-02-PLAN.md Task 1 complete, awaiting human verification
 
 Progress: [█████░░░░░░░░░░░░░░] 26% (5/19 plans complete)
 
@@ -78,6 +78,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-16 00:52 UTC
-Stopped at: Completed 03-01-PLAN.md -- Frame loop core (delta time, event pump, frame state)
-Resume file: None
+Last session: 2026-03-16 00:55 UTC
+Stopped at: 03-02-PLAN.md Task 1 complete -- awaiting checkpoint:human-verify (Task 2)
+Resume file: .planning/phases/03-frame-loop/03-02-PLAN.md
