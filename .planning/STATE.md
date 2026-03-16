@@ -5,33 +5,33 @@
 See: .planning/PROJECT.md (updated 2026-03-15)
 
 **Core value:** Developers can build 2D graphical applications using the CELS framework with SDL3 as the backend, using the same declarative ECS patterns they know from cels-ncurses
-**Current focus:** Phase 2 in progress -- Window Provider (plan 1 of 3 complete)
+**Current focus:** Phase 2 complete -- Window Provider. Ready for Phase 3 (Frame Loop)
 
 ## Current Position
 
 Phase: 2 of 10 (Window Provider)
-Plan: 1 of 3 in current phase
-Status: In progress
-Last activity: 2026-03-15 -- Completed 02-01-PLAN.md (Window Provider core types, creation, lifecycle wiring)
+Plan: 2 of 2 in current phase (phase complete)
+Status: Phase complete
+Last activity: 2026-03-15 -- Completed 02-02-PLAN.md (Window lifecycle verification, Wayland visibility fix)
 
-Progress: [███░░░░░░░░░░░░░░░░] 15% (3/19 plans complete)
+Progress: [████░░░░░░░░░░░░░░░] 21% (4/19 plans complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 3
-- Average duration: 3.3 min
-- Total execution time: 0.17 hours
+- Total plans completed: 4
+- Average duration: 3.5 min
+- Total execution time: 0.23 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-sdl3-bootstrap | 2/2 | 7 min | 3.5 min |
-| 02-window-provider | 1/3 | 3 min | 3 min |
+| 02-window-provider | 2/2 | 8 min | 4 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (4 min), 01-02 (3 min), 02-01 (3 min)
+- Last 5 plans: 01-01 (4 min), 01-02 (3 min), 02-01 (3 min), 02-02 (5 min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -55,6 +55,8 @@ Recent decisions affecting current work:
 - [02-01]: component_id passed explicitly from sdl3_module.c to sdl3_window.c (per-TU static ID constraint solution)
 - [02-01]: SDL_WINDOW_RESIZABLE ORed in at both composition and creation levels (borderless skips resizable)
 - [02-01]: CLOSING->CLOSED driven by per-frame state system (one frame delay for cleanup)
+- [02-02]: Wayland requires surface buffer commit + SDL_ShowWindow for window visibility (dummy driver works without)
+- [02-02]: Example verification pattern: cel_query + cel_each with pass/fail output for component state checking
 
 ### Pending Todos
 
@@ -70,6 +72,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-15 23:13 UTC
-Stopped at: Completed 02-01-PLAN.md -- Window Provider core
+Last session: 2026-03-15 23:55 UTC
+Stopped at: Completed 02-02-PLAN.md -- Phase 2 (Window Provider) complete
 Resume file: None
