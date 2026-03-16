@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-03-15)
 
 **Core value:** Developers can build 2D graphical applications using the CELS framework with SDL3 as the backend, using the same declarative ECS patterns they know from cels-ncurses
-**Current focus:** Phase 2 complete -- Window Provider. Ready for Phase 3 (Frame Loop)
+**Current focus:** Phase 3 in progress -- Frame Loop (plan 01 of 02 complete)
 
 ## Current Position
 
-Phase: 2 of 10 (Window Provider)
-Plan: 2 of 2 in current phase (phase complete)
-Status: Phase complete
-Last activity: 2026-03-15 -- Completed 02-02-PLAN.md (Window lifecycle verification, Wayland visibility fix)
+Phase: 3 of 10 (Frame Loop)
+Plan: 1 of 2 in current phase
+Status: In progress
+Last activity: 2026-03-16 -- Completed 03-01-PLAN.md (Frame loop core: delta time, event pump, frame state)
 
-Progress: [████░░░░░░░░░░░░░░░] 21% (4/19 plans complete)
+Progress: [█████░░░░░░░░░░░░░░] 26% (5/19 plans complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 4
-- Average duration: 3.5 min
-- Total execution time: 0.23 hours
+- Total plans completed: 5
+- Average duration: 3.6 min
+- Total execution time: 0.30 hours
 
 **By Phase:**
 
@@ -29,9 +29,10 @@ Progress: [████░░░░░░░░░░░░░░░] 21% (4/19 
 |-------|-------|-------|----------|
 | 01-sdl3-bootstrap | 2/2 | 7 min | 3.5 min |
 | 02-window-provider | 2/2 | 8 min | 4 min |
+| 03-frame-loop | 1/2 | 4 min | 4 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (4 min), 01-02 (3 min), 02-01 (3 min), 02-02 (5 min)
+- Last 5 plans: 01-02 (3 min), 02-01 (3 min), 02-02 (5 min), 03-01 (4 min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -57,6 +58,11 @@ Recent decisions affecting current work:
 - [02-01]: CLOSING->CLOSED driven by per-frame state system (one frame delay for cleanup)
 - [02-02]: Wayland requires surface buffer commit + SDL_ShowWindow for window visibility (dummy driver works without)
 - [02-02]: Example verification pattern: cel_query + cel_each with pass/fail output for component state checking
+- [03-01]: SDL3_FrameState data owned by sdl3_loop.c (same pattern as SDL3_ContextState in sdl3_init.c)
+- [03-01]: Event pump routes window events inline via cel_query/cel_each/cel_update (no separate routing layer)
+- [03-01]: Registration order EventPump -> WindowState -> FrameState ensures correct OnLoad phase execution
+- [03-01]: sdl3_delta() both computes delta and updates SDL3_FrameState fields (single call does both)
+- [03-01]: sdl3_frame_set_running() helper exposes frame state mutation to systems in sdl3_module.c
 
 ### Pending Todos
 
@@ -72,6 +78,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-15 23:55 UTC
-Stopped at: Completed 02-02-PLAN.md -- Phase 2 (Window Provider) complete
+Last session: 2026-03-16 00:52 UTC
+Stopped at: Completed 03-01-PLAN.md -- Frame loop core (delta time, event pump, frame state)
 Resume file: None
