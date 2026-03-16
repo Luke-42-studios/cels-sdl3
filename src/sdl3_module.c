@@ -53,6 +53,97 @@ CEL_Observe(SDL3_WindowLC, on_destroy) {
 }
 
 /* ============================================================================
+ * Event Pump System -- drains SDL events each frame
+ * ============================================================================
+ *
+ * Runs at OnLoad phase BEFORE WindowStateSystem. Pumps all pending SDL
+ * events, routes window events to sdl3_window_handle_event, and handles
+ * SDL_EVENT_QUIT. When all windows are minimized, blocks on SDL_WaitEvent
+ * for zero CPU usage.
+ */
+
+CEL_System(SDL3_EventPumpSystem, .phase = OnLoad) {
+    cel_run {
+        /* --- Minimized pause: block with zero CPU when all windows minimized --- */
+        int total_windows = 0;
+        int minimized_windows = 0;
+
+        cel_query(SDL3_WindowComponent);
+        cel_each(SDL3_WindowComponent) {
+            total_windows++;
+            if (SDL3_WindowComponent->state == SDL3_WINDOW_MINIMIZED) {
+                minimized_windows++;
+            }
+        }
+
+        SDL_Event event;
+
+        if (total_windows > 0 && total_windows == minimized_windows) {
+            /* All windows minimized -- block until waking event */
+            if (SDL_WaitEvent(&event)) {
+                if (event.type == SDL_EVENT_QUIT) {
+                    cel_quit();
+                    return;
+                }
+                /* Route window events from the waking event */
+                switch (event.type) {
+                case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
+                case SDL_EVENT_WINDOW_MINIMIZED:
+                case SDL_EVENT_WINDOW_RESTORED:
+                case SDL_EVENT_WINDOW_RESIZED: {
+                    cel_query(SDL3_WindowComponent);
+                    cel_each(SDL3_WindowComponent) {
+                        if (SDL3_WindowComponent->window_id == event.window.windowID) {
+                            cel_update(SDL3_WindowComponent) {
+                                sdl3_window_handle_event(
+                                    SDL3_WindowComponent, event.type,
+                                    event.window.data1, event.window.data2);
+                            }
+                        }
+                    }
+                    break;
+                }
+                default:
+                    break;
+                }
+            }
+            return;  /* Skip normal poll loop this frame */
+        }
+
+        /* --- Normal path: drain all pending events --- */
+        while (SDL_PollEvent(&event)) {
+            switch (event.type) {
+            case SDL_EVENT_QUIT:
+                cel_quit();
+                return;
+
+            case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
+            case SDL_EVENT_WINDOW_MINIMIZED:
+            case SDL_EVENT_WINDOW_RESTORED:
+            case SDL_EVENT_WINDOW_RESIZED: {
+                /* Find matching window entity by windowID */
+                cel_query(SDL3_WindowComponent);
+                cel_each(SDL3_WindowComponent) {
+                    if (SDL3_WindowComponent->window_id == event.window.windowID) {
+                        cel_update(SDL3_WindowComponent) {
+                            sdl3_window_handle_event(
+                                SDL3_WindowComponent, event.type,
+                                event.window.data1, event.window.data2);
+                        }
+                    }
+                }
+                break;
+            }
+
+            default:
+                /* Ignore other events (Phase 4 will add raw event buffer) */
+                break;
+            }
+        }
+    }
+}
+
+/* ============================================================================
  * Window State System -- per-frame state machine driver
  * ============================================================================ */
 
@@ -74,14 +165,50 @@ CEL_System(SDL3_WindowStateSystem, .phase = OnLoad) {
 }
 
 /* ============================================================================
+ * Frame State System -- manages running flag based on window states
+ * ============================================================================
+ *
+ * Runs at OnLoad phase AFTER WindowStateSystem. Checks if all windows
+ * have reached CLOSED state and sets running = false to exit the loop.
+ */
+
+CEL_System(SDL3_FrameStateSystem, .phase = OnLoad) {
+    cel_run {
+        int total_windows = 0;
+        int closed_windows = 0;
+
+        cel_query(SDL3_WindowComponent);
+        cel_each(SDL3_WindowComponent) {
+            total_windows++;
+            if (SDL3_WindowComponent->state == SDL3_WINDOW_CLOSED) {
+                closed_windows++;
+            }
+        }
+
+        /* All windows closed -> stop running */
+        if (total_windows > 0 && total_windows == closed_windows) {
+            sdl3_frame_set_running(false);
+        }
+    }
+}
+
+/* ============================================================================
  * Module Init
- * ============================================================================ */
+ * ============================================================================
+ *
+ * Registration order determines system execution within the same phase:
+ *   1. EventPump (drains events, routes to windows)
+ *   2. WindowState (CLOSING -> CLOSED transitions)
+ *   3. FrameState (checks if all windows closed)
+ */
 
 CEL_Module(SDL3_Engine, init) {
     cels_register(SDL3_ContextState, SDL3_ContextLC,
                   SDL3_ContextConfig);
+    cels_register(SDL3_FrameState, SDL3_EventPumpSystem);
     cels_register(SDL3_WindowConfig, SDL3_WindowComponent,
                   SDL3_WindowLC, SDL3_WindowStateSystem);
+    cels_register(SDL3_FrameStateSystem);
 }
 
 /* ============================================================================
