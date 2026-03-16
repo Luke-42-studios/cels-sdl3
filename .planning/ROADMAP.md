@@ -64,11 +64,11 @@ Plans:
   2. Delta time is calculated via SDL_GetPerformanceCounter/Frequency and passed to the ECS tick
   3. Frame loop continues running while window is in READY state and stops when all windows are CLOSED
   4. Events are pumped even when windows are minimized (no frozen event queue)
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] 03-01: TBD
-- [ ] 03-02: TBD
+- [ ] 03-01-PLAN.md -- Frame loop core: delta time, event pump system, running state, FPS tracking
+- [ ] 03-02-PLAN.md -- Frame loop example app with FPS reporting and clean exit verification
 
 ### Phase 4: Input System
 **Goal**: Developer can read input events as ECS components -- both a raw event queue for advanced handling and window-specific event routing for lifecycle management
@@ -185,7 +185,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 |-------|----------------|--------|-----------|
 | 1. SDL3 Bootstrap | 2/2 | Complete | 2026-03-15 |
 | 2. Window Provider | 2/2 | Complete | 2026-03-15 |
-| 3. Frame Loop | 0/TBD | Not started | - |
+| 3. Frame Loop | 0/2 | Not started | - |
 | 4. Input System | 0/TBD | Not started | - |
 | 5. Renderer Core | 0/TBD | Not started | - |
 | 6. Draw Primitives | 0/TBD | Not started | - |
