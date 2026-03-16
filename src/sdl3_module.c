@@ -14,6 +14,7 @@
 #include "sdl3_internal.h"
 
 CEL_State(SDL3_ContextState);
+CEL_State(SDL3_FrameState);
 
 /* ============================================================================
  * Context Lifecycle

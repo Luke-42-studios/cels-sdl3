@@ -23,4 +23,11 @@ extern void sdl3_window_handle_event(SDL3_WindowComponent* comp,
                                       Uint32 event_type,
                                       int data1, int data2);
 
+/* Loop lifecycle -- called from sdl3_module.c systems */
+extern void  sdl3_loop_init(void);
+extern float sdl3_compute_delta(void);
+extern float sdl3_compute_fps(float dt);
+extern void  sdl3_cap_frame_rate(Uint64 frame_start_ns, int target_fps);
+extern void  sdl3_frame_set_running(bool running);
+
 #endif /* CELS_SDL3_INTERNAL_H */

@@ -145,4 +145,35 @@ CEL_Define_Composition(SDL3Window,
 /* Call macro for natural syntax */
 #define SDL3Window(...) cel_init(SDL3Window, __VA_ARGS__)
 
+/* ============================================================================
+ * Frame Loop Types
+ * ============================================================================ */
+
+/*
+ * Frame loop configuration. Set target_fps to 0 for uncapped / VSync-only.
+ */
+typedef struct SDL3_FrameConfig {
+    int target_fps;     /* 0 = uncapped, >0 = cap to this FPS */
+} SDL3_FrameConfig;
+
+/*
+ * Frame loop state singleton. Tracks running status and timing data.
+ * Read via cel_read(SDL3_FrameState) in consumer systems.
+ *
+ * running:      false when all windows CLOSED or SDL_QUIT received
+ * delta_time:   seconds elapsed since last frame
+ * fps:          raw frames per second (1/dt)
+ * smoothed_fps: exponential moving average FPS for display
+ */
+CEL_Define_State(SDL3_FrameState) {
+    bool  running;
+    float delta_time;
+    float fps;
+    float smoothed_fps;
+};
+
+/* Frame loop public API */
+extern bool  sdl3_should_run(void);
+extern float sdl3_delta(void);
+
 #endif /* CELS_SDL3_H */
