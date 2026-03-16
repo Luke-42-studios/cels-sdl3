@@ -72,7 +72,9 @@ float sdl3_compute_delta(void) {
 static float s_smoothed_fps = 0.0f;
 
 float sdl3_compute_fps(float dt) {
-    float raw_fps = (dt > 0.0001f) ? (1.0f / dt) : 0.0f;
+    /* Guard only against zero/negative dt (first frame, counter wraparound).
+     * FLT_MIN (~1.2e-38) allows FPS tracking at any real frame rate. */
+    float raw_fps = (dt > 0.0f) ? (1.0f / dt) : 0.0f;
     s_smoothed_fps = SDL3_FPS_SMOOTHING * raw_fps
                    + (1.0f - SDL3_FPS_SMOOTHING) * s_smoothed_fps;
     return s_smoothed_fps;
@@ -107,7 +109,7 @@ float sdl3_delta(void) {
 
     /* Update frame state for systems to read via cel_read(SDL3_FrameState) */
     SDL3_FrameState.delta_time   = dt;
-    SDL3_FrameState.fps          = (dt > 0.0001f) ? (1.0f / dt) : 0.0f;
+    SDL3_FrameState.fps          = (dt > 0.0f) ? (1.0f / dt) : 0.0f;
     SDL3_FrameState.smoothed_fps = fps;
 
     return dt;

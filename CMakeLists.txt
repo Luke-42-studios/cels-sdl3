@@ -85,4 +85,8 @@ if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
     add_executable(minimal examples/minimal/main.c)
     target_link_libraries(minimal PRIVATE cels-sdl3)
     set_target_properties(minimal PROPERTIES C_STANDARD 99 C_STANDARD_REQUIRED ON)
+
+    add_executable(frame-loop examples/frame-loop/main.c)
+    target_link_libraries(frame-loop PRIVATE cels-sdl3)
+    set_target_properties(frame-loop PROPERTIES C_STANDARD 99 C_STANDARD_REQUIRED ON)
 endif()
