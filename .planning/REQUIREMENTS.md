@@ -9,8 +9,8 @@
 
 - [x] **FNDN-01**: SDL3 initializes with correct subsystem flags (VIDEO, EVENTS) and SDL3_ttf via TTF_Init (SDL3_image auto-initializes, no explicit init needed)
 - [x] **FNDN-02**: SDL3 shuts down cleanly — TTF_Quit then SDL_Quit in correct reverse order (SDL3_image has no quit function in 3.x)
-- [ ] **FNDN-03**: Window lifecycle state machine implements full state chain (NONE->CREATED->SURFACE_READY->READY->RESIZING->MINIMIZED->CLOSING->CLOSED)
-- [ ] **FNDN-04**: Each window is an ECS entity with Window/Renderer components — multi-window from day one
+- [x] **FNDN-03**: Window lifecycle state machine implements full state chain (NONE->CREATED->SURFACE_READY->READY->RESIZING->MINIMIZED->CLOSING->CLOSED)
+- [x] **FNDN-04**: Each window is an ECS entity with Window/Renderer components — multi-window from day one
 - [ ] **FNDN-05**: Frame loop integrates with CELS system scheduling — pumps events, ticks ECS, presents per frame
 - [ ] **FNDN-06**: Delta time calculated via SDL_GetPerformanceCounter/Frequency, passed to ECS tick
 
@@ -91,8 +91,8 @@
 |-------------|-------|--------|
 | FNDN-01 | Phase 1: SDL3 Bootstrap | Complete |
 | FNDN-02 | Phase 1: SDL3 Bootstrap | Complete |
-| FNDN-03 | Phase 2: Window Provider | Pending |
-| FNDN-04 | Phase 2: Window Provider | Pending |
+| FNDN-03 | Phase 2: Window Provider | Complete |
+| FNDN-04 | Phase 2: Window Provider | Complete |
 | FNDN-05 | Phase 3: Frame Loop | Pending |
 | FNDN-06 | Phase 3: Frame Loop | Pending |
 | INPT-01 | Phase 4: Input System | Pending |
