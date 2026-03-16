@@ -42,6 +42,9 @@ CEL_Lifecycle(SDL3_WindowLC);
 CEL_Observe(SDL3_WindowLC, on_create) {
     const SDL3_WindowConfig* config = cel_watch(entity, SDL3_WindowConfig);
     if (!config) return;
+    if (config->context) {
+        sdl3_ensure_init();
+    }
     sdl3_window_create(entity, config, SDL3_WindowComponent_id);
 }
 
@@ -153,12 +156,18 @@ CEL_System(SDL3_WindowStateSystem, .phase = OnLoad) {
         if (SDL3_WindowComponent->state == SDL3_WINDOW_CLOSING) {
             /* CLOSING -> CLOSED: one frame has elapsed since close request.
              * Destroy the SDL_Window and mark terminal state. */
+            bool owns_context = SDL3_WindowComponent->context_bound;
             if (SDL3_WindowComponent->window) {
                 sdl3_window_destroy(SDL3_WindowComponent->window);
             }
             cel_update(SDL3_WindowComponent) {
                 SDL3_WindowComponent->window = NULL;
                 SDL3_WindowComponent->state = SDL3_WINDOW_CLOSED;
+            }
+            /* Context-bound window closed: shut down SDL3 and exit loop */
+            if (owns_context) {
+                sdl3_shutdown();
+                sdl3_frame_set_running(false);
             }
         }
     }
@@ -222,10 +231,11 @@ CEL_Composition(SDL3Context) {
 
 CEL_Composition(SDL3Window) {
     cel_has(SDL3_WindowConfig,
-        .title  = cel.title,
-        .width  = cel.width  ? cel.width  : 1280,
-        .height = cel.height ? cel.height : 720,
-        .flags  = cel.flags | SDL_WINDOW_RESIZABLE
+        .title   = cel.title,
+        .width   = cel.width  ? cel.width  : 1280,
+        .height  = cel.height ? cel.height : 720,
+        .flags   = cel.flags | SDL_WINDOW_RESIZABLE,
+        .context = cel.context
     );
     cels_lifecycle_bind_entity(SDL3_WindowLC_id, cels_get_current_entity());
 }

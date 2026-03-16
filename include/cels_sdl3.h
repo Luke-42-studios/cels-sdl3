@@ -108,6 +108,7 @@ CEL_Component(SDL3_WindowConfig) {
     int             width;
     int             height;
     SDL_WindowFlags flags;
+    bool            context;    /* bind SDL3 context lifecycle to this window */
 };
 
 /*
@@ -122,6 +123,7 @@ CEL_Component(SDL3_WindowComponent) {
     SDL3_WindowState state;
     int              width;
     int              height;
+    bool             context_bound;  /* true if this window owns the SDL3 context */
 };
 
 /* ============================================================================
@@ -140,6 +142,7 @@ CEL_Define_Composition(SDL3Window,
     int width;
     int height;
     SDL_WindowFlags flags;
+    bool context;
 );
 
 /* Call macro for natural syntax */

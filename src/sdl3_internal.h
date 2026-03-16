@@ -10,6 +10,7 @@
 #include <cels_sdl3.h>
 
 extern void sdl3_init(const SDL3_ContextConfig* config);
+extern void sdl3_ensure_init(void);
 extern void sdl3_shutdown(void);
 
 /* Window lifecycle -- called from sdl3_module.c observers */

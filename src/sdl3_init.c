@@ -58,6 +58,16 @@ void sdl3_init(const SDL3_ContextConfig* config) {
 }
 
 /* ============================================================================
+ * Ensure Init -- auto-init with defaults if not yet initialized
+ * ============================================================================ */
+
+void sdl3_ensure_init(void) {
+    if (SDL3_ContextState.initialized) return;
+    SDL3_ContextConfig default_config = { .video = true };
+    sdl3_init(&default_config);
+}
+
+/* ============================================================================
  * Shutdown
  * ============================================================================ */
 

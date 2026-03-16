@@ -46,11 +46,12 @@ void sdl3_window_create(cels_entity_t entity,
      * SURFACE_READY is an instant pass-through for the SDL_Renderer path
      * (becomes meaningful in a future SDL_GPU path). */
     SDL3_WindowComponent comp = {
-        .window    = window,
-        .window_id = SDL_GetWindowID(window),
-        .state     = SDL3_WINDOW_READY,
-        .width     = w,
-        .height    = h
+        .window        = window,
+        .window_id     = SDL_GetWindowID(window),
+        .state         = SDL3_WINDOW_READY,
+        .width         = w,
+        .height        = h,
+        .context_bound = config->context
     };
 
     cels_entity_set_component(entity, component_id, &comp, sizeof(comp));
