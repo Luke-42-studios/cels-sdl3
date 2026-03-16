@@ -21,7 +21,7 @@
  * ============================================================================ */
 
 CEL_Compose(World) {
-    SDL3Window(.title = "Frame Loop Demo", .width = 800, .height = 600, .context = true) {}
+    SDL3Window(.title = "Frame Loop Demo", .width = 800, .height = 600, .context = true, .target_fps = 240) {}
 }
 
 /* ============================================================================

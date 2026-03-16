@@ -44,6 +44,9 @@ CEL_Observe(SDL3_WindowLC, on_create) {
     if (!config) return;
     if (config->context) {
         sdl3_ensure_init();
+        if (config->target_fps > 0) {
+            sdl3_set_target_fps(config->target_fps);
+        }
     }
     sdl3_window_create(entity, config, SDL3_WindowComponent_id);
 }
@@ -231,11 +234,12 @@ CEL_Composition(SDL3Context) {
 
 CEL_Composition(SDL3Window) {
     cel_has(SDL3_WindowConfig,
-        .title   = cel.title,
-        .width   = cel.width  ? cel.width  : 1280,
-        .height  = cel.height ? cel.height : 720,
-        .flags   = cel.flags | SDL_WINDOW_RESIZABLE,
-        .context = cel.context
+        .title      = cel.title,
+        .width      = cel.width  ? cel.width  : 1280,
+        .height     = cel.height ? cel.height : 720,
+        .flags      = cel.flags | SDL_WINDOW_RESIZABLE,
+        .context    = cel.context,
+        .target_fps = cel.target_fps
     );
     cels_lifecycle_bind_entity(SDL3_WindowLC_id, cels_get_current_entity());
 }

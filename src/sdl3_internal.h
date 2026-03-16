@@ -30,5 +30,6 @@ extern float sdl3_compute_delta(void);
 extern float sdl3_compute_fps(float dt);
 extern void  sdl3_cap_frame_rate(Uint64 frame_start_ns, int target_fps);
 extern void  sdl3_frame_set_running(bool running);
+extern void  sdl3_set_target_fps(int fps);
 
 #endif /* CELS_SDL3_INTERNAL_H */

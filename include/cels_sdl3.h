@@ -109,6 +109,7 @@ CEL_Component(SDL3_WindowConfig) {
     int             height;
     SDL_WindowFlags flags;
     bool            context;    /* bind SDL3 context lifecycle to this window */
+    int             target_fps; /* 0 = uncapped, >0 = cap to this FPS */
 };
 
 /*
@@ -143,6 +144,7 @@ CEL_Define_Composition(SDL3Window,
     int height;
     SDL_WindowFlags flags;
     bool context;
+    int target_fps;
 );
 
 /* Call macro for natural syntax */

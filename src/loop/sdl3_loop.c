@@ -70,6 +70,7 @@ float sdl3_compute_delta(void) {
 #define SDL3_FPS_SMOOTHING 0.1f  /* 10% new, 90% old -- smooth for display */
 
 static float s_smoothed_fps = 0.0f;
+static int   s_target_fps   = 0;
 
 float sdl3_compute_fps(float dt) {
     /* Guard only against zero/negative dt (first frame, counter wraparound).
@@ -104,6 +105,8 @@ bool sdl3_should_run(void) {
 }
 
 float sdl3_delta(void) {
+    Uint64 frame_start_ns = SDL_GetTicksNS();
+
     float dt  = sdl3_compute_delta();
     float fps = sdl3_compute_fps(dt);
 
@@ -111,6 +114,11 @@ float sdl3_delta(void) {
     SDL3_FrameState.delta_time   = dt;
     SDL3_FrameState.fps          = (dt > 0.0f) ? (1.0f / dt) : 0.0f;
     SDL3_FrameState.smoothed_fps = fps;
+
+    /* Cap frame rate if target is set */
+    if (s_target_fps > 0) {
+        sdl3_cap_frame_rate(frame_start_ns, s_target_fps);
+    }
 
     return dt;
 }
@@ -121,4 +129,8 @@ float sdl3_delta(void) {
 
 void sdl3_frame_set_running(bool running) {
     SDL3_FrameState.running = running;
+}
+
+void sdl3_set_target_fps(int fps) {
+    s_target_fps = fps;
 }
