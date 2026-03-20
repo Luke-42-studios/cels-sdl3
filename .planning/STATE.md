@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-03-15)
 
 **Core value:** Developers can build 2D graphical applications using the CELS framework with SDL3 as the backend, using the same declarative ECS patterns they know from cels-ncurses
-**Current focus:** Phase 4 in progress -- Input System. Plan 01 complete, Plan 02 (example app) next.
+**Current focus:** Phase 4 complete -- Input System. Ready for Phase 5 (Renderer Core).
 
 ## Current Position
 
 Phase: 4 of 10 (Input System)
-Plan: 1 of 2 in current phase
-Status: In progress
-Last activity: 2026-03-20 -- Completed 04-01-PLAN.md (Input system core: event queue, drain, module wiring)
+Plan: 2 of 2 in current phase
+Status: Phase complete
+Last activity: 2026-03-20 -- Completed 04-02-PLAN.md (Input example app)
 
-Progress: [███████░░░░░░░░░░░░] 37% (7/19 plans complete)
+Progress: [████████░░░░░░░░░░░] 42% (8/19 plans complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 7
-- Average duration: 11.6 min
-- Total execution time: 1.37 hours
+- Total plans completed: 8
+- Average duration: 10.4 min
+- Total execution time: 1.42 hours
 
 **By Phase:**
 
@@ -30,11 +30,11 @@ Progress: [███████░░░░░░░░░░░░] 37% (7/19 
 | 01-sdl3-bootstrap | 2/2 | 7 min | 3.5 min |
 | 02-window-provider | 2/2 | 8 min | 4 min |
 | 03-frame-loop | 2/2 | 12 min | 6 min |
-| 04-input-system | 1/2 | 55 min | 55 min |
+| 04-input-system | 2/2 | 58 min | 29 min |
 
 **Recent Trend:**
-- Last 5 plans: 02-01 (3 min), 02-02 (5 min), 03-01 (4 min), 03-02 (8 min), 04-01 (55 min)
-- Trend: 04-01 was significantly longer due to CELS framework investigation (component ID lazy init discovery) and build environment issues (no network for CMake reconfiguration)
+- Last 5 plans: 02-02 (5 min), 03-01 (4 min), 03-02 (8 min), 04-01 (55 min), 04-02 (3 min)
+- Trend: 04-02 returned to fast execution (3 min) -- straightforward example app following established patterns
 
 *Updated after each plan completion*
 
@@ -61,6 +61,8 @@ Recent decisions affecting current work:
 - [04-01]: Window table pattern: system builds SDL3_WindowTable via cel_each/cel_update, passes to cross-TU drain function
 - [04-01]: cels_ensure_component required for components used in observers (CEL_Component _register is a no-op)
 - [04-01]: Focus events routed to sdl3_window_handle_event as no-ops (no state transition)
+- [04-02]: Event consumer pattern: raw for-loop + switch on SDL3_EventQueue->events[0..count-1], no convenience macros
+- [04-02]: Mouse motion throttled via static counter (every 30th event) for readable console output
 
 ### Pending Todos
 
@@ -75,6 +77,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-20 20:52 UTC
-Stopped at: Completed 04-01-PLAN.md (Input system core)
+Last session: 2026-03-20 20:59 UTC
+Stopped at: Completed 04-02-PLAN.md (Input example app) -- Phase 4 complete
 Resume file: None
