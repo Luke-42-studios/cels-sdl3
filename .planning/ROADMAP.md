@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: SDL3 Bootstrap** - CMake scaffold, SDL3 FetchContent, init/shutdown lifecycle
 - [x] **Phase 2: Window Provider** - Window creation as ECS entity with full lifecycle state machine
 - [x] **Phase 3: Frame Loop** - CELS-integrated frame loop with delta time and event pumping
-- [ ] **Phase 4: Input System** - Event buffering, raw queue as ECS component, window event routing
+- [x] **Phase 4: Input System** - Event buffering, raw queue as ECS component, window event routing
 - [ ] **Phase 5: Renderer Core** - SDL_Renderer per window with clear/present cycle
 - [ ] **Phase 6: Draw Primitives** - Feature/Provider model with filled rects, outlined rects, and lines
 - [ ] **Phase 7: Textures** - SDL3_image loading and rendering with renderer affinity
@@ -82,8 +82,8 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 04-01-PLAN.md -- Input system core: SDL3_EventQueue component, single-pass event drain, module wiring
-- [ ] 04-02-PLAN.md -- Input example app with keyboard/mouse event reading and console logging
+- [x] 04-01-PLAN.md -- Input system core: SDL3_EventQueue component, single-pass event drain, module wiring
+- [x] 04-02-PLAN.md -- Input example app with keyboard/mouse event reading and console logging
 
 ### Phase 5: Renderer Core
 **Goal**: Each window entity has a paired SDL_Renderer that clears and presents every frame, producing a visible colored background
@@ -186,7 +186,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 1. SDL3 Bootstrap | 2/2 | Complete | 2026-03-15 |
 | 2. Window Provider | 2/2 | Complete | 2026-03-15 |
 | 3. Frame Loop | 2/2 | Complete | 2026-03-16 |
-| 4. Input System | 0/2 | Not started | - |
+| 4. Input System | 2/2 | Complete | 2026-03-20 |
 | 5. Renderer Core | 0/TBD | Not started | - |
 | 6. Draw Primitives | 0/TBD | Not started | - |
 | 7. Textures | 0/TBD | Not started | - |

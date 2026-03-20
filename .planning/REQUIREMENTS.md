@@ -16,9 +16,9 @@
 
 ### Input
 
-- [ ] **INPT-01**: SDL events are polled once per frame and buffered into a raw event queue
-- [ ] **INPT-02**: Event queue is accessible as an ECS component for systems to iterate
-- [ ] **INPT-03**: Window-specific events (close, resize, focus) route to correct window entity's state machine
+- [x] **INPT-01**: SDL events are polled once per frame and buffered into a raw event queue
+- [x] **INPT-02**: Event queue is accessible as an ECS component for systems to iterate
+- [x] **INPT-03**: Window-specific events (close, resize, focus) route to correct window entity's state machine
 
 ### Rendering
 
@@ -95,9 +95,9 @@
 | FNDN-04 | Phase 2: Window Provider | Complete |
 | FNDN-05 | Phase 3: Frame Loop | Complete |
 | FNDN-06 | Phase 3: Frame Loop | Complete |
-| INPT-01 | Phase 4: Input System | Pending |
-| INPT-02 | Phase 4: Input System | Pending |
-| INPT-03 | Phase 4: Input System | Pending |
+| INPT-01 | Phase 4: Input System | Complete |
+| INPT-02 | Phase 4: Input System | Complete |
+| INPT-03 | Phase 4: Input System | Complete |
 | RNDR-01 | Phase 5: Renderer Core | Pending |
 | RNDR-02 | Phase 5: Renderer Core | Pending |
 | RNDR-03 | Phase 6: Draw Primitives | Pending |
