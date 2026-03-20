@@ -181,4 +181,26 @@ CEL_Define_State(SDL3_FrameState) {
 extern bool  sdl3_should_run(void);
 extern float sdl3_delta(void);
 
+/* ============================================================================
+ * Input System Types
+ * ============================================================================ */
+
+#define SDL3_EVENT_QUEUE_CAPACITY 64
+
+/*
+ * Per-window raw event queue. Attached to each window entity alongside
+ * SDL3_WindowComponent. Cleared every frame before new events are polled.
+ *
+ * Consumer systems iterate events[] from 0 to count-1 and switch on
+ * SDL_Event.type. No convenience macros -- write your own for-loop.
+ *
+ * Window events (close, resize, minimize, restore, focus) are routed
+ * directly to the window state machine and NEVER appear in this queue.
+ * Only input events (keyboard, mouse, text, etc.) are buffered here.
+ */
+CEL_Component(SDL3_EventQueue) {
+    SDL_Event events[SDL3_EVENT_QUEUE_CAPACITY];
+    int       count;
+};
+
 #endif /* CELS_SDL3_H */

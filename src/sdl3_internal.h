@@ -32,4 +32,26 @@ extern void  sdl3_cap_frame_rate(Uint64 frame_start_ns, int target_fps);
 extern void  sdl3_frame_set_running(bool running);
 extern void  sdl3_set_target_fps(int fps);
 
+/* Input system -- called from sdl3_module.c systems
+ *
+ * The drain function cannot use cel_query/cel_each (per-TU static ID
+ * constraint), so the caller in sdl3_module.c collects window entity
+ * info into a small table and passes it here.
+ */
+#define SDL3_MAX_WINDOWS 8
+
+typedef struct SDL3_WindowEntry {
+    SDL_WindowID          window_id;
+    SDL3_WindowComponent* comp;       /* mutable pointer for event routing */
+    SDL3_EventQueue*      queue;      /* mutable pointer for event buffering */
+} SDL3_WindowEntry;
+
+typedef struct SDL3_WindowTable {
+    SDL3_WindowEntry entries[SDL3_MAX_WINDOWS];
+    int              count;
+    int              minimized_count;
+} SDL3_WindowTable;
+
+extern void sdl3_input_drain_events(SDL3_WindowTable* table);
+
 #endif /* CELS_SDL3_INTERNAL_H */

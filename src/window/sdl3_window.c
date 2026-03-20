@@ -98,8 +98,13 @@ void sdl3_window_handle_event(SDL3_WindowComponent* comp,
         }
         break;
 
+    case SDL_EVENT_WINDOW_FOCUS_GAINED:
+    case SDL_EVENT_WINDOW_FOCUS_LOST:
+        /* Routed for completeness; no state machine transition */
+        break;
+
     default:
-        /* Informational events (focus, expose, etc.) -- no state change */
+        /* Informational events (expose, etc.) -- no state change */
         break;
     }
 }
