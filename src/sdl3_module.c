@@ -84,34 +84,32 @@ CEL_Observe(SDL3_WindowLC, on_destroy) {
  */
 
 CEL_System(SDL3_InputSystem, .phase = OnLoad) {
-    cel_run {
-        SDL3_WindowTable table = { .count = 0, .minimized_count = 0 };
+    SDL3_WindowTable table = { .count = 0, .minimized_count = 0 };
 
-        cel_query(SDL3_WindowComponent, SDL3_EventQueue);
-        cel_each(SDL3_WindowComponent, SDL3_EventQueue) {
-            cel_update(SDL3_WindowComponent) {
-                cel_update(SDL3_EventQueue) {
-                    /* Clear queue for this frame */
-                    SDL3_EventQueue->count = 0;
+    cel_query(SDL3_WindowComponent, SDL3_EventQueue);
+    cel_each(SDL3_WindowComponent, SDL3_EventQueue) {
+        cel_update(SDL3_WindowComponent) {
+            cel_update(SDL3_EventQueue) {
+                /* Clear queue for this frame */
+                SDL3_EventQueue->count = 0;
 
-                    /* Add to window table for drain function */
-                    if (table.count < SDL3_MAX_WINDOWS) {
-                        table.entries[table.count] = (SDL3_WindowEntry){
-                            .window_id = SDL3_WindowComponent->window_id,
-                            .comp      = SDL3_WindowComponent,
-                            .queue     = SDL3_EventQueue
-                        };
-                        if (SDL3_WindowComponent->state == SDL3_WINDOW_MINIMIZED) {
-                            table.minimized_count++;
-                        }
-                        table.count++;
+                /* Add to window table for drain function */
+                if (table.count < SDL3_MAX_WINDOWS) {
+                    table.entries[table.count] = (SDL3_WindowEntry){
+                        .window_id = SDL3_WindowComponent->window_id,
+                        .comp      = SDL3_WindowComponent,
+                        .queue     = SDL3_EventQueue
+                    };
+                    if (SDL3_WindowComponent->state == SDL3_WINDOW_MINIMIZED) {
+                        table.minimized_count++;
                     }
+                    table.count++;
                 }
             }
         }
-
-        sdl3_input_drain_events(&table);
     }
+
+    sdl3_input_drain_events(&table);
 }
 
 /* ============================================================================
@@ -150,22 +148,20 @@ CEL_System(SDL3_WindowStateSystem, .phase = OnLoad) {
  */
 
 CEL_System(SDL3_FrameStateSystem, .phase = OnLoad) {
-    cel_run {
-        int total_windows = 0;
-        int closed_windows = 0;
+    int total_windows = 0;
+    int closed_windows = 0;
 
-        cel_query(SDL3_WindowComponent);
-        cel_each(SDL3_WindowComponent) {
-            total_windows++;
-            if (SDL3_WindowComponent->state == SDL3_WINDOW_CLOSED) {
-                closed_windows++;
-            }
+    cel_query(SDL3_WindowComponent);
+    cel_each(SDL3_WindowComponent) {
+        total_windows++;
+        if (SDL3_WindowComponent->state == SDL3_WINDOW_CLOSED) {
+            closed_windows++;
         }
+    }
 
-        /* All windows closed -> stop running */
-        if (total_windows > 0 && total_windows == closed_windows) {
-            sdl3_frame_set_running(false);
-        }
+    /* All windows closed -> stop running */
+    if (total_windows > 0 && total_windows == closed_windows) {
+        sdl3_frame_set_running(false);
     }
 }
 
