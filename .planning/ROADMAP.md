@@ -79,11 +79,11 @@ Plans:
   2. Raw event queue is accessible as an ECS component that systems can iterate over
   3. Window-specific events (close request, resize, focus gain/loss) route to the correct window entity and update its state machine
   4. A consumer system can read the event queue and respond to keyboard input (e.g., pressing Escape closes the window)
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] 04-01: TBD
-- [ ] 04-02: TBD
+- [ ] 04-01-PLAN.md -- Input system core: SDL3_EventQueue component, single-pass event drain, module wiring
+- [ ] 04-02-PLAN.md -- Input example app with keyboard/mouse event reading and console logging
 
 ### Phase 5: Renderer Core
 **Goal**: Each window entity has a paired SDL_Renderer that clears and presents every frame, producing a visible colored background
@@ -186,7 +186,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 1. SDL3 Bootstrap | 2/2 | Complete | 2026-03-15 |
 | 2. Window Provider | 2/2 | Complete | 2026-03-15 |
 | 3. Frame Loop | 2/2 | Complete | 2026-03-16 |
-| 4. Input System | 0/TBD | Not started | - |
+| 4. Input System | 0/2 | Not started | - |
 | 5. Renderer Core | 0/TBD | Not started | - |
 | 6. Draw Primitives | 0/TBD | Not started | - |
 | 7. Textures | 0/TBD | Not started | - |
