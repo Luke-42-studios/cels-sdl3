@@ -49,6 +49,11 @@ CEL_Observe(SDL3_WindowLC, on_create) {
         }
     }
     sdl3_window_create(entity, config, SDL3_WindowComponent_id);
+
+    /* Attach empty event queue so InputSystem can buffer events per-window */
+    SDL3_EventQueue empty_queue = { .count = 0 };
+    cels_entity_set_component(entity, SDL3_EventQueue_id,
+                              &empty_queue, sizeof(empty_queue));
 }
 
 CEL_Observe(SDL3_WindowLC, on_destroy) {
@@ -59,93 +64,53 @@ CEL_Observe(SDL3_WindowLC, on_destroy) {
 }
 
 /* ============================================================================
- * Event Pump System -- drains SDL events each frame
+ * Input System -- drains SDL events, routes to windows, fills queues
  * ============================================================================
  *
- * Runs at OnLoad phase BEFORE WindowStateSystem. Pumps all pending SDL
- * events, routes window events to sdl3_window_handle_event, and handles
- * SDL_EVENT_QUIT. When all windows are minimized, blocks on SDL_WaitEvent
- * for zero CPU usage.
+ * Runs at OnLoad phase BEFORE WindowStateSystem. Replaces Phase 3's
+ * EventPumpSystem with a unified input pipeline:
+ *
+ *   1. Clear all per-window event queues (count = 0)
+ *   2. Build a window table with mutable pointers for the drain function
+ *   3. Call sdl3_input_drain_events which:
+ *      - Handles minimized-pause (SDL_WaitEvent when all windows minimized)
+ *      - Polls all pending SDL events (SDL_PollEvent)
+ *      - Routes window events to sdl3_window_handle_event (never queued)
+ *      - Routes SDL_EVENT_QUIT to cels_request_quit
+ *      - Buffers all other events into per-window SDL3_EventQueue by windowID
+ *
+ * The drain function lives in sdl3_input.c and receives the window table
+ * because it cannot use cel_query/cel_each (per-TU static ID constraint).
  */
 
-CEL_System(SDL3_EventPumpSystem, .phase = OnLoad) {
+CEL_System(SDL3_InputSystem, .phase = OnLoad) {
     cel_run {
-        /* --- Minimized pause: block with zero CPU when all windows minimized --- */
-        int total_windows = 0;
-        int minimized_windows = 0;
+        SDL3_WindowTable table = { .count = 0, .minimized_count = 0 };
 
-        cel_query(SDL3_WindowComponent);
-        cel_each(SDL3_WindowComponent) {
-            total_windows++;
-            if (SDL3_WindowComponent->state == SDL3_WINDOW_MINIMIZED) {
-                minimized_windows++;
-            }
-        }
+        cel_query(SDL3_WindowComponent, SDL3_EventQueue);
+        cel_each(SDL3_WindowComponent, SDL3_EventQueue) {
+            cel_update(SDL3_WindowComponent) {
+                cel_update(SDL3_EventQueue) {
+                    /* Clear queue for this frame */
+                    SDL3_EventQueue->count = 0;
 
-        SDL_Event event;
-
-        if (total_windows > 0 && total_windows == minimized_windows) {
-            /* All windows minimized -- block until waking event */
-            if (SDL_WaitEvent(&event)) {
-                if (event.type == SDL_EVENT_QUIT) {
-                    cel_quit();
-                    return;
-                }
-                /* Route window events from the waking event */
-                switch (event.type) {
-                case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
-                case SDL_EVENT_WINDOW_MINIMIZED:
-                case SDL_EVENT_WINDOW_RESTORED:
-                case SDL_EVENT_WINDOW_RESIZED: {
-                    cel_query(SDL3_WindowComponent);
-                    cel_each(SDL3_WindowComponent) {
-                        if (SDL3_WindowComponent->window_id == event.window.windowID) {
-                            cel_update(SDL3_WindowComponent) {
-                                sdl3_window_handle_event(
-                                    SDL3_WindowComponent, event.type,
-                                    event.window.data1, event.window.data2);
-                            }
+                    /* Add to window table for drain function */
+                    if (table.count < SDL3_MAX_WINDOWS) {
+                        table.entries[table.count] = (SDL3_WindowEntry){
+                            .window_id = SDL3_WindowComponent->window_id,
+                            .comp      = SDL3_WindowComponent,
+                            .queue     = SDL3_EventQueue
+                        };
+                        if (SDL3_WindowComponent->state == SDL3_WINDOW_MINIMIZED) {
+                            table.minimized_count++;
                         }
-                    }
-                    break;
-                }
-                default:
-                    break;
-                }
-            }
-            return;  /* Skip normal poll loop this frame */
-        }
-
-        /* --- Normal path: drain all pending events --- */
-        while (SDL_PollEvent(&event)) {
-            switch (event.type) {
-            case SDL_EVENT_QUIT:
-                cel_quit();
-                return;
-
-            case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
-            case SDL_EVENT_WINDOW_MINIMIZED:
-            case SDL_EVENT_WINDOW_RESTORED:
-            case SDL_EVENT_WINDOW_RESIZED: {
-                /* Find matching window entity by windowID */
-                cel_query(SDL3_WindowComponent);
-                cel_each(SDL3_WindowComponent) {
-                    if (SDL3_WindowComponent->window_id == event.window.windowID) {
-                        cel_update(SDL3_WindowComponent) {
-                            sdl3_window_handle_event(
-                                SDL3_WindowComponent, event.type,
-                                event.window.data1, event.window.data2);
-                        }
+                        table.count++;
                     }
                 }
-                break;
-            }
-
-            default:
-                /* Ignore other events (Phase 4 will add raw event buffer) */
-                break;
             }
         }
+
+        sdl3_input_drain_events(&table);
     }
 }
 
@@ -209,7 +174,7 @@ CEL_System(SDL3_FrameStateSystem, .phase = OnLoad) {
  * ============================================================================
  *
  * Registration order determines system execution within the same phase:
- *   1. EventPump (drains events, routes to windows)
+ *   1. InputSystem (drains events, routes to windows, fills queues)
  *   2. WindowState (CLOSING -> CLOSED transitions)
  *   3. FrameState (checks if all windows closed)
  */
@@ -217,10 +182,19 @@ CEL_System(SDL3_FrameStateSystem, .phase = OnLoad) {
 CEL_Module(SDL3_Engine, init) {
     cels_register(SDL3_ContextState, SDL3_ContextLC,
                   SDL3_ContextConfig);
-    cels_register(SDL3_FrameState, SDL3_EventPumpSystem);
-    cels_register(SDL3_WindowConfig, SDL3_WindowComponent,
+    cels_register(SDL3_FrameState, SDL3_InputSystem);
+    cels_register(SDL3_WindowConfig, SDL3_WindowComponent, SDL3_EventQueue,
                   SDL3_WindowLC, SDL3_WindowStateSystem);
     cels_register(SDL3_FrameStateSystem);
+
+    /* Eagerly initialize SDL3_EventQueue_id so the window creation observer
+     * (CEL_Observe(SDL3_WindowLC, on_create)) can attach an empty queue to
+     * each new window entity. CEL_Component _register() is a no-op -- the
+     * actual ID is only assigned by cels_ensure_component when cel_has or
+     * cel_query first references the type. The observer fires before any
+     * system body runs, so we force initialization here. */
+    cels_ensure_component(&SDL3_EventQueue_id, "SDL3_EventQueue",
+                          sizeof(SDL3_EventQueue), CELS_ALIGNOF(SDL3_EventQueue));
 }
 
 /* ============================================================================

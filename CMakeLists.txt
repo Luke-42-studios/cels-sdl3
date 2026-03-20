@@ -65,6 +65,7 @@ target_sources(cels-sdl3 INTERFACE
     ${CMAKE_CURRENT_SOURCE_DIR}/src/sdl3_init.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/loop/sdl3_loop.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/window/sdl3_window.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/input/sdl3_input.c
 )
 
 target_include_directories(cels-sdl3 INTERFACE
