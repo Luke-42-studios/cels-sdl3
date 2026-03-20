@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-03-15)
 
 **Core value:** Developers can build 2D graphical applications using the CELS framework with SDL3 as the backend, using the same declarative ECS patterns they know from cels-ncurses
-**Current focus:** Phase 3 complete -- Frame Loop. Ready for Phase 4 (Input System)
+**Current focus:** Phase 4 in progress -- Input System. Plan 01 complete, Plan 02 (example app) next.
 
 ## Current Position
 
-Phase: 3 of 10 (Frame Loop)
-Plan: 2 of 2 in current phase (phase complete)
-Status: Phase complete
-Last activity: 2026-03-16 -- Completed 03-02-PLAN.md (Frame loop example, context binding, FPS capping)
+Phase: 4 of 10 (Input System)
+Plan: 1 of 2 in current phase
+Status: In progress
+Last activity: 2026-03-20 -- Completed 04-01-PLAN.md (Input system core: event queue, drain, module wiring)
 
-Progress: [██████░░░░░░░░░░░░░] 32% (6/19 plans complete)
+Progress: [███████░░░░░░░░░░░░] 37% (7/19 plans complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 6
-- Average duration: 4.5 min
-- Total execution time: 0.45 hours
+- Total plans completed: 7
+- Average duration: 11.6 min
+- Total execution time: 1.37 hours
 
 **By Phase:**
 
@@ -30,10 +30,11 @@ Progress: [██████░░░░░░░░░░░░░] 32% (6/19 
 | 01-sdl3-bootstrap | 2/2 | 7 min | 3.5 min |
 | 02-window-provider | 2/2 | 8 min | 4 min |
 | 03-frame-loop | 2/2 | 12 min | 6 min |
+| 04-input-system | 1/2 | 55 min | 55 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-02 (3 min), 02-01 (3 min), 02-02 (5 min), 03-01 (4 min), 03-02 (8 min)
-- Trend: slightly increasing (more complex plans)
+- Last 5 plans: 02-01 (3 min), 02-02 (5 min), 03-01 (4 min), 03-02 (8 min), 04-01 (55 min)
+- Trend: 04-01 was significantly longer due to CELS framework investigation (component ID lazy init discovery) and build environment issues (no network for CMake reconfiguration)
 
 *Updated after each plan completion*
 
@@ -52,10 +53,14 @@ Recent decisions affecting current work:
 - [02-02]: Wayland requires surface buffer commit + SDL_ShowWindow for window visibility
 - [03-01]: SDL3_FrameState data owned by sdl3_loop.c (same pattern as SDL3_ContextState in sdl3_init.c)
 - [03-01]: Event pump routes window events inline via cel_query/cel_each/cel_update
-- [03-01]: Registration order EventPump -> WindowState -> FrameState ensures correct OnLoad execution
+- [03-01]: Registration order InputSystem -> WindowState -> FrameState ensures correct OnLoad execution
 - [03-02]: .context = true on SDL3Window binds SDL3 context lifecycle to that window
 - [03-02]: WindowStateSystem triggers sdl3_shutdown() when context-bound window closes
 - [03-02]: Frame rate capping via .target_fps on SDL3Window, wired through sdl3_delta() -> sdl3_cap_frame_rate()
+- [04-01]: Fixed 64-event SDL3_EventQueue (8 KiB per window), cleared every frame
+- [04-01]: Window table pattern: system builds SDL3_WindowTable via cel_each/cel_update, passes to cross-TU drain function
+- [04-01]: cels_ensure_component required for components used in observers (CEL_Component _register is a no-op)
+- [04-01]: Focus events routed to sdl3_window_handle_event as no-ops (no state transition)
 
 ### Pending Todos
 
@@ -66,9 +71,10 @@ None.
 - [Research]: SDL3_ttf text engine API may have changed significantly from SDL2_ttf (Phase 8)
 - [Research]: CELS framework macros (CEL_DefineModule, CEL_DefineFeature, CEL_Provides) need verification against current headers
 - [Note]: cels framework test_lifecycle_fsm has pre-existing build failure (missing header) -- does not affect cels-sdl3
+- [Note]: Build environment requires FETCHCONTENT_SOURCE_DIR_SDL3 pointing to local SDL3 checkout for CMake reconfiguration (no network access)
 
 ## Session Continuity
 
-Last session: 2026-03-16 01:30 UTC
-Stopped at: Completed Phase 3 (Frame Loop) -- all plans executed, verified, roadmap updated
+Last session: 2026-03-20 20:52 UTC
+Stopped at: Completed 04-01-PLAN.md (Input system core)
 Resume file: None
