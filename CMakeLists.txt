@@ -105,4 +105,15 @@ if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
     add_executable(draw-primitives examples/draw-primitives/main.c)
     target_link_libraries(draw-primitives PRIVATE cels-sdl3)
     set_target_properties(draw-primitives PROPERTIES C_STANDARD 99 C_STANDARD_REQUIRED ON)
+
+    add_executable(textures examples/textures/main.c)
+    target_link_libraries(textures PRIVATE cels-sdl3)
+    set_target_properties(textures PROPERTIES C_STANDARD 99 C_STANDARD_REQUIRED ON)
+
+    # Copy texture assets to build directory so sdl3_set_asset_base_dir("assets") resolves
+    add_custom_command(TARGET textures POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_CURRENT_SOURCE_DIR}/examples/textures/assets
+        $<TARGET_FILE_DIR:textures>/assets
+    )
 endif()
