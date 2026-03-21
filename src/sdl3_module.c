@@ -54,6 +54,16 @@ CEL_Observe(SDL3_WindowLC, on_create) {
     SDL3_EventQueue empty_queue = { .count = 0 };
     cels_entity_set_component(entity, SDL3_EventQueue_id,
                               &empty_queue, sizeof(empty_queue));
+
+    /* Create renderer for this window -- must happen after window creation
+     * since sdl3_renderer_create needs the SDL_Window* from the component.
+     * Re-read the window component to get the created window pointer. */
+    const SDL3_WindowComponent* win_comp =
+        (const SDL3_WindowComponent*)cels_entity_get_component(
+            entity, SDL3_WindowComponent_id);
+    if (win_comp && win_comp->window) {
+        sdl3_renderer_create(entity, win_comp->window, SDL3_Renderer_id);
+    }
 }
 
 CEL_Observe(SDL3_WindowLC, on_destroy) {
@@ -123,12 +133,18 @@ CEL_System(SDL3_InputSystem, .phase = OnLoad) {
  * ============================================================================ */
 
 CEL_System(SDL3_WindowStateSystem, .phase = OnLoad) {
-    cel_query(SDL3_WindowComponent);
-    cel_each(SDL3_WindowComponent) {
+    cel_query(SDL3_WindowComponent, SDL3_Renderer);
+    cel_each(SDL3_WindowComponent, SDL3_Renderer) {
         if (SDL3_WindowComponent->state == SDL3_WINDOW_CLOSING) {
             /* CLOSING -> CLOSED: one frame has elapsed since close request.
-             * Destroy the SDL_Window and mark terminal state. */
+             * Destroy renderer BEFORE window (SDL requirement). */
             bool owns_context = SDL3_WindowComponent->context_bound;
+            if (SDL3_Renderer->renderer) {
+                sdl3_renderer_destroy(SDL3_Renderer->renderer);
+                cel_update(SDL3_Renderer) {
+                    SDL3_Renderer->renderer = NULL;
+                }
+            }
             if (SDL3_WindowComponent->window) {
                 sdl3_window_destroy(SDL3_WindowComponent->window);
             }
@@ -173,6 +189,49 @@ CEL_System(SDL3_FrameStateSystem, .phase = OnLoad) {
 }
 
 /* ============================================================================
+ * Render Clear System -- clears each window's renderer to its clear color
+ * ============================================================================
+ *
+ * Runs at PreRender phase. Developer draw systems slot in at OnRender
+ * between this clear and the present system.
+ */
+
+CEL_System(SDL3_RenderClearSystem, .phase = PreRender) {
+    cel_query(SDL3_WindowComponent, SDL3_Renderer);
+    cel_each(SDL3_WindowComponent, SDL3_Renderer) {
+        /* Skip windows that should not render */
+        if (SDL3_WindowComponent->state == SDL3_WINDOW_MINIMIZED ||
+            SDL3_WindowComponent->state == SDL3_WINDOW_CLOSING ||
+            SDL3_WindowComponent->state == SDL3_WINDOW_CLOSED) continue;
+
+        SDL_SetRenderDrawColor(SDL3_Renderer->renderer,
+            SDL3_Renderer->clear_color.r,
+            SDL3_Renderer->clear_color.g,
+            SDL3_Renderer->clear_color.b,
+            SDL3_Renderer->clear_color.a);
+        SDL_RenderClear(SDL3_Renderer->renderer);
+    }
+}
+
+/* ============================================================================
+ * Render Present System -- presents each window's backbuffer
+ * ============================================================================
+ *
+ * Runs at PostRender phase, after all developer draw systems have run.
+ */
+
+CEL_System(SDL3_RenderPresentSystem, .phase = PostRender) {
+    cel_query(SDL3_WindowComponent, SDL3_Renderer);
+    cel_each(SDL3_WindowComponent, SDL3_Renderer) {
+        if (SDL3_WindowComponent->state == SDL3_WINDOW_MINIMIZED ||
+            SDL3_WindowComponent->state == SDL3_WINDOW_CLOSING ||
+            SDL3_WindowComponent->state == SDL3_WINDOW_CLOSED) continue;
+
+        SDL_RenderPresent(SDL3_Renderer->renderer);
+    }
+}
+
+/* ============================================================================
  * Module Init
  * ============================================================================
  *
@@ -180,6 +239,8 @@ CEL_System(SDL3_FrameStateSystem, .phase = OnLoad) {
  *   1. InputSystem (drains events, routes to windows, fills queues)
  *   2. WindowState (CLOSING -> CLOSED transitions)
  *   3. FrameState (checks if all windows closed)
+ *   4. RenderClear (PreRender phase -- clears each window)
+ *   5. RenderPresent (PostRender phase -- presents each window)
  */
 
 CEL_Module(SDL3_Engine, init) {
@@ -187,8 +248,11 @@ CEL_Module(SDL3_Engine, init) {
                   SDL3_ContextConfig);
     cels_register(SDL3_FrameState, SDL3_InputSystem);
     cels_register(SDL3_WindowConfig, SDL3_WindowComponent, SDL3_EventQueue,
+                  SDL3_Renderer,
                   SDL3_WindowLC, SDL3_WindowStateSystem);
     cels_register(SDL3_FrameStateSystem);
+    cels_register(SDL3_RenderClearSystem);
+    cels_register(SDL3_RenderPresentSystem);
 
     /* Eagerly initialize SDL3_EventQueue_id so the window creation observer
      * (CEL_Observe(SDL3_WindowLC, on_create)) can attach an empty queue to
@@ -198,6 +262,11 @@ CEL_Module(SDL3_Engine, init) {
      * system body runs, so we force initialization here. */
     cels_ensure_component(&SDL3_EventQueue_id, "SDL3_EventQueue",
                           sizeof(SDL3_EventQueue), CELS_ALIGNOF(SDL3_EventQueue));
+
+    /* Same pattern for SDL3_Renderer_id -- the on_create observer uses it
+     * to attach a renderer component before any system body runs. */
+    cels_ensure_component(&SDL3_Renderer_id, "SDL3_Renderer",
+                          sizeof(SDL3_Renderer), CELS_ALIGNOF(SDL3_Renderer));
 }
 
 /* ============================================================================
