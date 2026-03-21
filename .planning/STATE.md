@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-03-15)
 
 **Core value:** Developers can build 2D graphical applications using the CELS framework with SDL3 as the backend, using the same declarative ECS patterns they know from cels-ncurses
-**Current focus:** Phase 7 complete -- Textures. Both plans delivered (core + example). Ready for Phase 8.
+**Current focus:** Phase 8 in progress -- Text Rendering. Plan 01 (core) complete, Plan 02 (example) next.
 
 ## Current Position
 
-Phase: 7 of 10 (Textures)
-Plan: 2 of 2 in current phase
-Status: Phase complete
-Last activity: 2026-03-21 -- Completed 07-02-PLAN.md (textures example with sprite controller)
+Phase: 8 of 10 (Text Rendering)
+Plan: 1 of 2 in current phase
+Status: In progress
+Last activity: 2026-03-21 -- Completed 08-01-PLAN.md (text rendering core)
 
-Progress: [██████████████░░░░░░] 70% (14/20 plans complete)
+Progress: [███████████████░░░░░] 75% (15/20 plans complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 14
-- Average duration: 7.4 min
-- Total execution time: 1.70 hours
+- Total plans completed: 15
+- Average duration: 7.3 min
+- Total execution time: 1.80 hours
 
 **By Phase:**
 
@@ -34,10 +34,11 @@ Progress: [██████████████░░░░░░] 70% (14
 | 05-renderer-core | 2/2 | 5 min | 2.5 min |
 | 06-draw-primitives | 2/2 | 6 min | 3 min |
 | 07-textures | 2/2 | 6 min | 3 min |
+| 08-text-rendering | 1/2 | 6 min | 6 min |
 
 **Recent Trend:**
-- Last 5 plans: 05-02 (2 min), 06-01 (4 min), 06-02 (2 min), 07-01 (4 min), 07-02 (2 min)
-- Trend: Phases 5-7 consistently fast (2-4 min per plan) -- established patterns and reusable infrastructure
+- Last 5 plans: 06-01 (4 min), 06-02 (2 min), 07-01 (4 min), 07-02 (2 min), 08-01 (6 min)
+- Trend: Consistent 2-6 min per plan with established patterns
 
 *Updated after each plan completion*
 
@@ -83,6 +84,11 @@ Recent decisions affecting current work:
 - [07-01]: Declarative asset loading pattern: set path on component, system detects NONE state and loads automatically
 - [07-02]: Single sprite per entity with keyboard mode switching to demonstrate all features
 - [07-02]: POST_BUILD copy_directory for asset deployment to build directory
+- [08-01]: TTF_TextEngine stored on SDL3_Renderer component (couples text engine to renderer lifetime)
+- [08-01]: Text entities separate from window entities -- system finds first active renderer then iterates text
+- [08-01]: Block scope required for multiple cel_query calls in same system body (_cel_next_field_index redefinition)
+- [08-01]: Two-pass cleanup: first pass destroys TTF_Text handles, second pass destroys text engine then renderer
+- [08-01]: sdl3_fonts_close_all() in sdl3_shutdown() before TTF_Quit() for safe font cleanup
 
 ### Pending Todos
 
@@ -90,13 +96,13 @@ None.
 
 ### Blockers/Concerns
 
-- [Research]: SDL3_ttf text engine API may have changed significantly from SDL2_ttf (Phase 8)
 - [Research]: CELS framework macros (CEL_DefineModule, CEL_DefineFeature, CEL_Provides) need verification against current headers
 - [Note]: cels framework test_lifecycle_fsm has pre-existing build failure (missing header) -- does not affect cels-sdl3
 - [Note]: Build environment requires FETCHCONTENT_SOURCE_DIR_SDL3 pointing to local SDL3 checkout for CMake reconfiguration (no network access)
+- [Note]: SDL_VIDEODRIVER=dummy crashes all examples (pre-existing, dummy driver doesn't support renderer creation)
 
 ## Session Continuity
 
-Last session: 2026-03-21 23:40 UTC
-Stopped at: Completed 07-02-PLAN.md (textures example) -- Phase 7 complete
+Last session: 2026-03-21 23:52 UTC
+Stopped at: Completed 08-01-PLAN.md (text rendering core) -- Phase 8 plan 1 complete
 Resume file: None
