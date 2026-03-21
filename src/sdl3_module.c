@@ -129,6 +129,99 @@ CEL_System(SDL3_InputSystem, .phase = OnLoad) {
 }
 
 /* ============================================================================
+ * Texture Load System -- loads textures for sprites with NONE state
+ * ============================================================================
+ *
+ * Runs at OnLoad phase AFTER InputSystem. Scans for sprites with a
+ * texture_path set but state == NONE, loads via IMG_LoadTexture into
+ * the per-renderer texture cache, and transitions to READY or FAILED.
+ *
+ * Sprites MUST live on window entities (same entity that has the renderer).
+ */
+
+CEL_System(SDL3_TextureLoadSystem, .phase = OnLoad) {
+    cel_query(SDL3_Sprite, SDL3_Renderer, SDL3_WindowComponent);
+    cel_each(SDL3_Sprite, SDL3_Renderer, SDL3_WindowComponent) {
+        if (SDL3_Sprite->state != SDL3_TEXTURE_NONE) continue;
+        if (!SDL3_Sprite->texture_path) continue;
+        if (!SDL3_Renderer->renderer) continue;
+
+        SDL3_TextureCache* cache = sdl3_texture_cache_for_renderer(
+            SDL3_Renderer->renderer);
+        if (!cache) continue;
+
+        cel_update(SDL3_Sprite) {
+            SDL3_Sprite->state = SDL3_TEXTURE_LOADING;
+            uint32_t handle = sdl3_texture_cache_load(
+                cache, SDL3_Renderer->renderer, SDL3_Sprite->texture_path);
+
+            if (handle != 0) {
+                SDL3_Sprite->texture_handle = handle;
+                SDL3_Sprite->state = SDL3_TEXTURE_READY;
+            } else {
+                SDL3_Sprite->state = SDL3_TEXTURE_FAILED;
+                SDL_Log("SDL3: Failed to load texture '%s': %s",
+                        SDL3_Sprite->texture_path, SDL_GetError());
+            }
+        }
+    }
+}
+
+/* ============================================================================
+ * Sprite Render System -- renders READY sprites via SDL_RenderTextureRotated
+ * ============================================================================
+ *
+ * Runs at OnRender phase. Draws all sprites in READY state with support
+ * for source/destination rects, rotation, flip, and per-sprite alpha.
+ */
+
+CEL_System(SDL3_SpriteRenderSystem, .phase = OnRender) {
+    cel_query(SDL3_Sprite, SDL3_Renderer, SDL3_WindowComponent);
+    cel_each(SDL3_Sprite, SDL3_Renderer, SDL3_WindowComponent) {
+        if (SDL3_WindowComponent->state == SDL3_WINDOW_MINIMIZED ||
+            SDL3_WindowComponent->state == SDL3_WINDOW_CLOSING ||
+            SDL3_WindowComponent->state == SDL3_WINDOW_CLOSED) continue;
+        if (SDL3_Sprite->state != SDL3_TEXTURE_READY) continue;
+
+        SDL3_TextureCache* cache = sdl3_texture_cache_for_renderer(
+            SDL3_Renderer->renderer);
+        if (!cache) continue;
+
+        SDL_Texture* tex = sdl3_texture_cache_get(
+            cache, SDL3_Sprite->texture_handle);
+        if (!tex) continue;
+
+        /* Apply per-sprite alpha modulation */
+        if (SDL3_Sprite->alpha < 255) {
+            SDL_SetTextureAlphaMod(tex, SDL3_Sprite->alpha);
+        }
+
+        /* Determine source rect: NULL = entire texture */
+        const SDL_FRect* src = NULL;
+        if (SDL3_Sprite->src_rect.w > 0 && SDL3_Sprite->src_rect.h > 0) {
+            src = &SDL3_Sprite->src_rect;
+        }
+
+        /* Determine rotation center: NULL = center of dst_rect */
+        const SDL_FPoint* center = NULL;
+        if (SDL3_Sprite->center.x != 0 || SDL3_Sprite->center.y != 0) {
+            center = &SDL3_Sprite->center;
+        }
+
+        SDL_RenderTextureRotated(
+            SDL3_Renderer->renderer, tex,
+            src, &SDL3_Sprite->dst_rect,
+            SDL3_Sprite->angle, center,
+            SDL3_Sprite->flip);
+
+        /* Reset alpha mod to avoid state leakage to other sprites using same texture */
+        if (SDL3_Sprite->alpha < 255) {
+            SDL_SetTextureAlphaMod(tex, 255);
+        }
+    }
+}
+
+/* ============================================================================
  * Window State System -- per-frame state machine driver
  * ============================================================================ */
 
@@ -140,6 +233,10 @@ CEL_System(SDL3_WindowStateSystem, .phase = OnLoad) {
              * Destroy renderer BEFORE window (SDL requirement). */
             bool owns_context = SDL3_WindowComponent->context_bound;
             if (SDL3_Renderer->renderer) {
+                /* Invalidate all cached textures for this renderer.
+                 * Does NOT call SDL_DestroyTexture -- SDL_DestroyRenderer
+                 * handles that automatically. Removes renderer from cache table. */
+                sdl3_texture_cache_remove_renderer(SDL3_Renderer->renderer);
                 sdl3_draw_buffer_destroy(SDL3_Renderer);
                 sdl3_renderer_destroy(SDL3_Renderer->renderer);
                 cel_update(SDL3_Renderer) {
@@ -274,23 +371,27 @@ CEL_System(SDL3_RenderPresentSystem, .phase = PostRender) {
  * ============================================================================
  *
  * Registration order determines system execution within the same phase:
- *   1. InputSystem (drains events, routes to windows, fills queues)
- *   2. WindowState (CLOSING -> CLOSED transitions)
- *   3. FrameState (checks if all windows closed)
- *   4. RenderClear (PreRender phase -- clears each window, resets draw buffers)
- *   5. DrawFlush (PostRender phase -- sorts and flushes draw commands)
- *   6. RenderPresent (PostRender phase -- presents each window)
+ *   1.  InputSystem (drains events, routes to windows, fills queues)
+ *   1b. TextureLoadSystem (loads textures for sprites with NONE state)
+ *   2.  WindowState (CLOSING -> CLOSED transitions, texture cache cleanup)
+ *   3.  FrameState (checks if all windows closed)
+ *   4.  RenderClear (PreRender phase -- clears each window, resets draw buffers)
+ *   4b. SpriteRenderSystem (OnRender phase -- renders READY sprites)
+ *   5.  DrawFlush (PostRender phase -- sorts and flushes draw commands)
+ *   6.  RenderPresent (PostRender phase -- presents each window)
  */
 
 CEL_Module(SDL3_Engine, init) {
     cels_register(SDL3_ContextState, SDL3_ContextLC,
                   SDL3_ContextConfig);
     cels_register(SDL3_FrameState, SDL3_InputSystem);
+    cels_register(SDL3_TextureLoadSystem);
     cels_register(SDL3_WindowConfig, SDL3_WindowComponent, SDL3_EventQueue,
-                  SDL3_Renderer,
+                  SDL3_Renderer, SDL3_Sprite,
                   SDL3_WindowLC, SDL3_WindowStateSystem);
     cels_register(SDL3_FrameStateSystem);
     cels_register(SDL3_RenderClearSystem);
+    cels_register(SDL3_SpriteRenderSystem);
     cels_register(SDL3_DrawFlushSystem);
     cels_register(SDL3_RenderPresentSystem);
 
@@ -307,6 +408,11 @@ CEL_Module(SDL3_Engine, init) {
      * to attach a renderer component before any system body runs. */
     cels_ensure_component(&SDL3_Renderer_id, "SDL3_Renderer",
                           sizeof(SDL3_Renderer), CELS_ALIGNOF(SDL3_Renderer));
+
+    /* Same pattern for SDL3_Sprite_id -- systems that query SDL3_Sprite
+     * need the component ID initialized before any system body runs. */
+    cels_ensure_component(&SDL3_Sprite_id, "SDL3_Sprite",
+                          sizeof(SDL3_Sprite), CELS_ALIGNOF(SDL3_Sprite));
 }
 
 /* ============================================================================

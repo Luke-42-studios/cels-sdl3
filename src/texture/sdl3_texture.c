@@ -16,7 +16,7 @@
  */
 
 #include <cels_sdl3.h>
-#include "sdl3_internal.h"
+#include "../sdl3_internal.h"
 #include <string.h>
 
 /* ============================================================================
