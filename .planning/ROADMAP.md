@@ -105,16 +105,16 @@ Plans:
 **Depends on**: Phase 5
 **Requirements**: RNDR-03, RNDR-04, RNDR-05, RNDR-06
 **Success Criteria** (what must be TRUE):
-  1. Feature/Provider model is established -- CEL_DefineFeature(Renderable) and CEL_Provides(SDL3, Renderable, ...) work
+  1. Feature/Provider model is established -- SDL3_Renderable vtable struct with function pointers for draw operations
   2. Developer can draw a filled rectangle with a specified color at a given position and size
   3. Developer can draw an outlined rectangle with a specified color at a given position and size
   4. Developer can draw a line with a specified color between two points
   5. Draw calls execute within the clear/present cycle and appear on screen
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] 06-01: TBD
-- [ ] 06-02: TBD
+- [ ] 06-01-PLAN.md -- Draw primitives core: SDL3_Renderable vtable, draw command buffer, flush system, module wiring
+- [ ] 06-02-PLAN.md -- Draw primitives example app with z-ordering demonstration
 
 ### Phase 7: Textures
 **Goal**: Developer can load images from disk and render them as textured quads, with textures correctly bound to their window's renderer
@@ -188,7 +188,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 3. Frame Loop | 2/2 | Complete | 2026-03-16 |
 | 4. Input System | 2/2 | Complete | 2026-03-20 |
 | 5. Renderer Core | 2/2 | Complete | 2026-03-21 |
-| 6. Draw Primitives | 0/TBD | Not started | - |
+| 6. Draw Primitives | 0/2 | Not started | - |
 | 7. Textures | 0/TBD | Not started | - |
 | 8. Text Rendering | 0/TBD | Not started | - |
 | 9. Module Integration | 0/TBD | Not started | - |
