@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-03-15)
 
 **Core value:** Developers can build 2D graphical applications using the CELS framework with SDL3 as the backend, using the same declarative ECS patterns they know from cels-ncurses
-**Current focus:** Phase 8 in progress -- Text Rendering. Plan 01 (core) complete, Plan 02 (example) next.
+**Current focus:** Phase 8 complete -- Text Rendering. Both plans done. Ready for Phase 9 (Clay Integration).
 
 ## Current Position
 
 Phase: 8 of 10 (Text Rendering)
-Plan: 1 of 2 in current phase
-Status: In progress
-Last activity: 2026-03-21 -- Completed 08-01-PLAN.md (text rendering core)
+Plan: 2 of 2 in current phase
+Status: Phase complete
+Last activity: 2026-03-21 -- Completed 08-02-PLAN.md (text rendering example)
 
-Progress: [███████████████░░░░░] 75% (15/20 plans complete)
+Progress: [████████████████░░░░] 80% (16/20 plans complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 15
-- Average duration: 7.3 min
-- Total execution time: 1.80 hours
+- Total plans completed: 16
+- Average duration: 7.1 min
+- Total execution time: 1.85 hours
 
 **By Phase:**
 
@@ -34,10 +34,10 @@ Progress: [███████████████░░░░░] 75% (15
 | 05-renderer-core | 2/2 | 5 min | 2.5 min |
 | 06-draw-primitives | 2/2 | 6 min | 3 min |
 | 07-textures | 2/2 | 6 min | 3 min |
-| 08-text-rendering | 1/2 | 6 min | 6 min |
+| 08-text-rendering | 2/2 | 9 min | 4.5 min |
 
 **Recent Trend:**
-- Last 5 plans: 06-01 (4 min), 06-02 (2 min), 07-01 (4 min), 07-02 (2 min), 08-01 (6 min)
+- Last 5 plans: 06-02 (2 min), 07-01 (4 min), 07-02 (2 min), 08-01 (6 min), 08-02 (3 min)
 - Trend: Consistent 2-6 min per plan with established patterns
 
 *Updated after each plan completion*
@@ -89,6 +89,9 @@ Recent decisions affecting current work:
 - [08-01]: Block scope required for multiple cel_query calls in same system body (_cel_next_field_index redefinition)
 - [08-01]: Two-pass cleanup: first pass destroys TTF_Text handles, second pass destroys text engine then renderer
 - [08-01]: sdl3_fonts_close_all() in sdl3_shutdown() before TTF_Quit() for safe font cleanup
+- [08-02]: Text entities created via cel_entity() in CEL_Compose alongside SDL3Window -- same TU avoids per-TU ID issues
+- [08-02]: TextInteraction uses dual block-scoped cel_query: first reads events, second modifies text
+- [08-02]: Dynamic text identified by y-position range rather than entity ID tracking
 
 ### Pending Todos
 
@@ -103,6 +106,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-21 23:52 UTC
-Stopped at: Completed 08-01-PLAN.md (text rendering core) -- Phase 8 plan 1 complete
+Last session: 2026-03-21 23:57 UTC
+Stopped at: Completed 08-02-PLAN.md (text rendering example) -- Phase 8 complete
 Resume file: None
