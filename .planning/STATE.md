@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-03-15)
 
 **Core value:** Developers can build 2D graphical applications using the CELS framework with SDL3 as the backend, using the same declarative ECS patterns they know from cels-ncurses
-**Current focus:** Phase 7 in progress -- Textures. Plan 1 (core) delivered. Plan 2 (example) next.
+**Current focus:** Phase 7 complete -- Textures. Both plans delivered (core + example). Ready for Phase 8.
 
 ## Current Position
 
 Phase: 7 of 10 (Textures)
-Plan: 1 of 2 in current phase
-Status: In progress
-Last activity: 2026-03-21 -- Completed 07-01-PLAN.md (texture cache, sprite component, load/render systems)
+Plan: 2 of 2 in current phase
+Status: Phase complete
+Last activity: 2026-03-21 -- Completed 07-02-PLAN.md (textures example with sprite controller)
 
-Progress: [█████████████░░░░░░░] 65% (13/20 plans complete)
+Progress: [██████████████░░░░░░] 70% (14/20 plans complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 13
-- Average duration: 7.8 min
-- Total execution time: 1.67 hours
+- Total plans completed: 14
+- Average duration: 7.4 min
+- Total execution time: 1.70 hours
 
 **By Phase:**
 
@@ -33,10 +33,10 @@ Progress: [█████████████░░░░░░░] 65% (13
 | 04-input-system | 2/2 | 58 min | 29 min |
 | 05-renderer-core | 2/2 | 5 min | 2.5 min |
 | 06-draw-primitives | 2/2 | 6 min | 3 min |
-| 07-textures | 1/2 | 4 min | 4 min |
+| 07-textures | 2/2 | 6 min | 3 min |
 
 **Recent Trend:**
-- Last 5 plans: 05-01 (3 min), 05-02 (2 min), 06-01 (4 min), 06-02 (2 min), 07-01 (4 min)
+- Last 5 plans: 05-02 (2 min), 06-01 (4 min), 06-02 (2 min), 07-01 (4 min), 07-02 (2 min)
 - Trend: Phases 5-7 consistently fast (2-4 min per plan) -- established patterns and reusable infrastructure
 
 *Updated after each plan completion*
@@ -81,6 +81,8 @@ Recent decisions affecting current work:
 - [07-01]: Cache invalidation zeroes entries without SDL_DestroyTexture -- SDL_DestroyRenderer handles that
 - [07-01]: Per-sprite alpha modulation with reset to prevent state leakage between sprites sharing same texture
 - [07-01]: Declarative asset loading pattern: set path on component, system detects NONE state and loads automatically
+- [07-02]: Single sprite per entity with keyboard mode switching to demonstrate all features
+- [07-02]: POST_BUILD copy_directory for asset deployment to build directory
 
 ### Pending Todos
 
@@ -95,6 +97,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-21 23:35 UTC
-Stopped at: Completed 07-01-PLAN.md (texture cache, sprite component, load/render systems) -- Phase 7 plan 1 complete
+Last session: 2026-03-21 23:40 UTC
+Stopped at: Completed 07-02-PLAN.md (textures example) -- Phase 7 complete
 Resume file: None
