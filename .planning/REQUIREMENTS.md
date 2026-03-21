@@ -31,9 +31,9 @@
 
 ### Textures
 
-- [ ] **TXTR-01**: Developer can load PNG/JPG image from file path into SDL_Texture via SDL3_image
-- [ ] **TXTR-02**: Developer can render texture at position/size with optional source rect
-- [ ] **TXTR-03**: Textures are associated with their window's renderer (renderer-affine)
+- [x] **TXTR-01**: Developer can load PNG/JPG image from file path into SDL_Texture via SDL3_image
+- [x] **TXTR-02**: Developer can render texture at position/size with optional source rect
+- [x] **TXTR-03**: Textures are associated with their window's renderer (renderer-affine)
 
 ### Text
 
@@ -104,9 +104,9 @@
 | RNDR-04 | Phase 6: Draw Primitives | Complete |
 | RNDR-05 | Phase 6: Draw Primitives | Complete |
 | RNDR-06 | Phase 6: Draw Primitives | Complete |
-| TXTR-01 | Phase 7: Textures | Pending |
-| TXTR-02 | Phase 7: Textures | Pending |
-| TXTR-03 | Phase 7: Textures | Pending |
+| TXTR-01 | Phase 7: Textures | Complete |
+| TXTR-02 | Phase 7: Textures | Complete |
+| TXTR-03 | Phase 7: Textures | Complete |
 | TEXT-01 | Phase 8: Text Rendering | Pending |
 | TEXT-02 | Phase 8: Text Rendering | Pending |
 | TEXT-03 | Phase 8: Text Rendering | Pending |

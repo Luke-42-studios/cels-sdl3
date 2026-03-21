@@ -18,7 +18,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 4: Input System** - Event buffering, raw queue as ECS component, window event routing
 - [x] **Phase 5: Renderer Core** - SDL_Renderer per window with clear/present cycle
 - [x] **Phase 6: Draw Primitives** - Feature/Provider model with filled rects, outlined rects, and lines
-- [ ] **Phase 7: Textures** - SDL3_image loading and rendering with renderer affinity
+- [x] **Phase 7: Textures** - SDL3_image loading and rendering with renderer affinity
 - [ ] **Phase 8: Text Rendering** - SDL3_ttf font loading, text rendering, and caching
 - [ ] **Phase 9: Module Integration** - Engine module bundling, a la carte registration, cleanup ordering, error reporting
 - [ ] **Phase 10: Example Application** - Demo app exercising all v1 features end-to-end
@@ -128,8 +128,8 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 07-01-PLAN.md -- Texture cache, SDL3_Sprite component, loading/render systems, module wiring
-- [ ] 07-02-PLAN.md -- Textures example app with sub-rect, rotation, flip, and alpha demonstration
+- [x] 07-01-PLAN.md -- Texture cache, SDL3_Sprite component, loading/render systems, module wiring
+- [x] 07-02-PLAN.md -- Textures example app with sub-rect, rotation, flip, and alpha demonstration
 
 ### Phase 8: Text Rendering
 **Goal**: Developer can load fonts and render text strings with specified color and size, with caching to avoid per-frame re-rendering
@@ -190,7 +190,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 4. Input System | 2/2 | Complete | 2026-03-20 |
 | 5. Renderer Core | 2/2 | Complete | 2026-03-21 |
 | 6. Draw Primitives | 2/2 | Complete | 2026-03-21 |
-| 7. Textures | 0/2 | Not started | - |
+| 7. Textures | 2/2 | Complete | 2026-03-21 |
 | 8. Text Rendering | 0/2 | Not started | - |
 | 9. Module Integration | 0/2 | Not started | - |
 | 10. Example Application | 0/2 | Not started | - |
