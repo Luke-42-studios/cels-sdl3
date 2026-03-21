@@ -61,4 +61,32 @@ typedef struct SDL3_WindowTable {
 
 extern void sdl3_input_drain_events(SDL3_WindowTable* table);
 
+/* ============================================================================
+ * Draw primitives -- draw buffer lifecycle and renderer-to-buffer lookup
+ * ============================================================================ */
+
+#define SDL3_DRAW_BUFFER_INITIAL_CAPACITY 256
+
+typedef struct SDL3_DrawBufferEntry {
+    SDL_Renderer*  renderer;
+    SDL3_Renderer* comp;    /* mutable pointer to the component (has draw buffer fields) */
+} SDL3_DrawBufferEntry;
+
+typedef struct SDL3_DrawBufferTable {
+    SDL3_DrawBufferEntry entries[SDL3_MAX_WINDOWS];
+    int count;
+} SDL3_DrawBufferTable;
+
+/* Draw buffer lifecycle */
+extern void sdl3_draw_buffer_init(SDL3_Renderer* comp);
+extern void sdl3_draw_buffer_clear(SDL3_Renderer* comp);
+extern void sdl3_draw_buffer_push(SDL3_Renderer* comp, SDL3_DrawCmd cmd);
+extern void sdl3_draw_buffer_flush(SDL3_Renderer* comp);
+extern void sdl3_draw_buffer_destroy(SDL3_Renderer* comp);
+
+/* Renderer-to-buffer lookup */
+extern void sdl3_draw_table_clear(void);
+extern void sdl3_draw_table_add(SDL_Renderer* renderer, SDL3_Renderer* comp);
+extern SDL3_Renderer* sdl3_draw_table_find(SDL_Renderer* renderer);
+
 #endif /* CELS_SDL3_INTERNAL_H */

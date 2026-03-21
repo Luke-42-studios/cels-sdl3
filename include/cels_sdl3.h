@@ -204,6 +204,37 @@ CEL_Component(SDL3_EventQueue) {
 };
 
 /* ============================================================================
+ * Draw Primitive Types
+ * ============================================================================
+ *
+ * Draw commands are buffered during OnRender, sorted by z-index, and flushed
+ * to SDL3 before present. Developer calls through the SDL3_Renderable vtable:
+ *
+ *   const SDL3_Renderable* draw = sdl3_renderable();
+ *   draw->filled_rect(r, rect, color, z);
+ *
+ * Alpha blending is OFF by default. Enable with:
+ *   sdl3_set_blend_mode(renderer, SDL_BLENDMODE_BLEND);
+ */
+
+typedef enum SDL3_DrawCmdType {
+    SDL3_DRAW_FILLED_RECT,
+    SDL3_DRAW_OUTLINED_RECT,
+    SDL3_DRAW_LINE
+} SDL3_DrawCmdType;
+
+typedef struct SDL3_DrawCmd {
+    SDL3_DrawCmdType type;
+    int z;          /* z-index for sorting */
+    int order;      /* creation order tiebreaker */
+    SDL_Color color;
+    union {
+        SDL_FRect rect;                     /* filled/outlined rect */
+        struct { SDL_FPoint a, b; } line;   /* line endpoints */
+    };
+} SDL3_DrawCmd;
+
+/* ============================================================================
  * Renderer Types
  * ============================================================================ */
 
@@ -215,10 +246,38 @@ CEL_Component(SDL3_EventQueue) {
  * clear_color: background color used by RenderClearSystem each frame.
  * Default: cornflower blue (100, 149, 237, 255). Changeable at runtime
  * by any system -- takes effect next frame.
+ *
+ * draw_cmds/draw_count/draw_capacity/draw_next_order: per-window draw
+ * command buffer. Embedded here (not a separate component) for tight
+ * coupling with the renderer.
  */
 CEL_Component(SDL3_Renderer) {
     SDL_Renderer* renderer;
     SDL_Color     clear_color;
+    /* Draw buffer -- embedded for tight coupling with renderer */
+    SDL3_DrawCmd* draw_cmds;
+    int           draw_count;
+    int           draw_capacity;
+    int           draw_next_order;
 };
+
+/* ============================================================================
+ * Renderable Vtable
+ * ============================================================================ */
+
+typedef struct SDL3_Renderable {
+    void (*filled_rect)(SDL_Renderer* r, SDL_FRect rect, SDL_Color color, int z);
+    void (*filled_rects)(SDL_Renderer* r, const SDL_FRect* rects,
+                         const SDL_Color* colors, int count, int z);
+    void (*outlined_rect)(SDL_Renderer* r, SDL_FRect rect, SDL_Color color, int z);
+    void (*outlined_rects)(SDL_Renderer* r, const SDL_FRect* rects,
+                           const SDL_Color* colors, int count, int z);
+    void (*line)(SDL_Renderer* r, SDL_FPoint a, SDL_FPoint b, SDL_Color color, int z);
+} SDL3_Renderable;
+
+extern const SDL3_Renderable* sdl3_renderable(void);
+extern void SDL3_Renderable_use(void);
+
+extern void sdl3_set_blend_mode(SDL_Renderer* renderer, SDL_BlendMode mode);
 
 #endif /* CELS_SDL3_H */
