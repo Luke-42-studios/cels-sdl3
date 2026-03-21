@@ -151,15 +151,15 @@ Plans:
 **Depends on**: Phase 8
 **Requirements**: INTG-01, INTG-02, INTG-03, INTG-04
 **Success Criteria** (what must be TRUE):
-  1. SDL3_Engine_use() registers all providers via CEL_DefineModule(SDL3_Engine) in a single call
+  1. SDL3_use() registers all providers via CEL_Module(SDL3_Engine) in a single call
   2. Individual providers are available a la carte -- developer can call SDL3_Window_use(), SDL3_Input_use(), etc. independently
   3. On shutdown, all SDL resources are destroyed in correct order: textures and fonts first, then renderers, then windows, then SDL_Quit
   4. SDL_GetError() is surfaced through an error reporting mechanism when SDL operations fail
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] 09-01: TBD
-- [ ] 09-02: TBD
+- [ ] 09-01-PLAN.md -- Error reporting infrastructure: SDL3_ErrorCallback, SDL3_Config, sdl3_report_error, migration of existing error sites
+- [ ] 09-02-PLAN.md -- Registration partitioning: individual _use() functions, SDL3_use() all-in-one, cleanup ordering
 
 ### Phase 10: Example Application
 **Goal**: A working example application demonstrates every v1 feature, serving as both validation and documentation
@@ -191,5 +191,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 6. Draw Primitives | 0/2 | Not started | - |
 | 7. Textures | 0/2 | Not started | - |
 | 8. Text Rendering | 0/2 | Not started | - |
-| 9. Module Integration | 0/TBD | Not started | - |
+| 9. Module Integration | 0/2 | Not started | - |
 | 10. Example Application | 0/TBD | Not started | - |
