@@ -140,11 +140,11 @@ Plans:
   2. Developer can render a text string at a position with specified color and size, and it appears correctly on screen
   3. Unchanged text (same string, font, color, size) does not re-render every frame -- the cached texture is reused
   4. Changing the text string, color, or size invalidates the cache and produces updated rendered text
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] 08-01: TBD
-- [ ] 08-02: TBD
+- [ ] 08-01-PLAN.md -- Font API, text components, text engine per-window, text render system, cleanup ordering
+- [ ] 08-02-PLAN.md -- Text rendering example app with interactive font/color/content changes
 
 ### Phase 9: Module Integration
 **Goal**: All providers are bundled into a single engine module with correct registration, ordered cleanup, and error reporting
@@ -190,6 +190,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 5. Renderer Core | 2/2 | Complete | 2026-03-21 |
 | 6. Draw Primitives | 0/2 | Not started | - |
 | 7. Textures | 0/TBD | Not started | - |
-| 8. Text Rendering | 0/TBD | Not started | - |
+| 8. Text Rendering | 0/2 | Not started | - |
 | 9. Module Integration | 0/TBD | Not started | - |
 | 10. Example Application | 0/TBD | Not started | - |
