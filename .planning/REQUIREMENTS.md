@@ -24,10 +24,10 @@
 
 - [x] **RNDR-01**: SDL_Renderer created per window entity, paired with its SDL_Window
 - [x] **RNDR-02**: Clear/present cycle runs per window per frame (clear background, draw, present)
-- [ ] **RNDR-03**: Feature/Provider model — CEL_DefineFeature(Renderable), CEL_Provides(SDL3, Renderable, ...)
-- [ ] **RNDR-04**: Developer can draw filled rectangles with color at position/size
-- [ ] **RNDR-05**: Developer can draw outlined rectangles with color at position/size
-- [ ] **RNDR-06**: Developer can draw lines with color between two points
+- [x] **RNDR-03**: Feature/Provider model — CEL_DefineFeature(Renderable), CEL_Provides(SDL3, Renderable, ...)
+- [x] **RNDR-04**: Developer can draw filled rectangles with color at position/size
+- [x] **RNDR-05**: Developer can draw outlined rectangles with color at position/size
+- [x] **RNDR-06**: Developer can draw lines with color between two points
 
 ### Textures
 
@@ -100,10 +100,10 @@
 | INPT-03 | Phase 4: Input System | Complete |
 | RNDR-01 | Phase 5: Renderer Core | Pending |
 | RNDR-02 | Phase 5: Renderer Core | Pending |
-| RNDR-03 | Phase 6: Draw Primitives | Pending |
-| RNDR-04 | Phase 6: Draw Primitives | Pending |
-| RNDR-05 | Phase 6: Draw Primitives | Pending |
-| RNDR-06 | Phase 6: Draw Primitives | Pending |
+| RNDR-03 | Phase 6: Draw Primitives | Complete |
+| RNDR-04 | Phase 6: Draw Primitives | Complete |
+| RNDR-05 | Phase 6: Draw Primitives | Complete |
+| RNDR-06 | Phase 6: Draw Primitives | Complete |
 | TXTR-01 | Phase 7: Textures | Pending |
 | TXTR-02 | Phase 7: Textures | Pending |
 | TXTR-03 | Phase 7: Textures | Pending |

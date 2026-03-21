@@ -17,7 +17,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 3: Frame Loop** - CELS-integrated frame loop with delta time and event pumping
 - [x] **Phase 4: Input System** - Event buffering, raw queue as ECS component, window event routing
 - [x] **Phase 5: Renderer Core** - SDL_Renderer per window with clear/present cycle
-- [ ] **Phase 6: Draw Primitives** - Feature/Provider model with filled rects, outlined rects, and lines
+- [x] **Phase 6: Draw Primitives** - Feature/Provider model with filled rects, outlined rects, and lines
 - [ ] **Phase 7: Textures** - SDL3_image loading and rendering with renderer affinity
 - [ ] **Phase 8: Text Rendering** - SDL3_ttf font loading, text rendering, and caching
 - [ ] **Phase 9: Module Integration** - Engine module bundling, a la carte registration, cleanup ordering, error reporting
@@ -113,8 +113,8 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 06-01-PLAN.md -- Draw primitives core: SDL3_Renderable vtable, draw command buffer, flush system, module wiring
-- [ ] 06-02-PLAN.md -- Draw primitives example app with z-ordering demonstration
+- [x] 06-01-PLAN.md -- Draw primitives core: SDL3_Renderable vtable, draw command buffer, flush system, module wiring
+- [x] 06-02-PLAN.md -- Draw primitives example app with z-ordering demonstration
 
 ### Phase 7: Textures
 **Goal**: Developer can load images from disk and render them as textured quads, with textures correctly bound to their window's renderer
@@ -189,7 +189,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 3. Frame Loop | 2/2 | Complete | 2026-03-16 |
 | 4. Input System | 2/2 | Complete | 2026-03-20 |
 | 5. Renderer Core | 2/2 | Complete | 2026-03-21 |
-| 6. Draw Primitives | 0/2 | Not started | - |
+| 6. Draw Primitives | 2/2 | Complete | 2026-03-21 |
 | 7. Textures | 0/2 | Not started | - |
 | 8. Text Rendering | 0/2 | Not started | - |
 | 9. Module Integration | 0/2 | Not started | - |
