@@ -125,11 +125,11 @@ Plans:
   2. Developer can render a texture at a specified position and size, with optional source rectangle for sub-image rendering
   3. Textures are associated with their creating renderer -- attempting to use a texture with the wrong renderer is prevented or produces a clear error
   4. Loaded textures can be reused across multiple frames without reloading
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] 07-01: TBD
-- [ ] 07-02: TBD
+- [ ] 07-01-PLAN.md -- Texture cache, SDL3_Sprite component, loading/render systems, module wiring
+- [ ] 07-02-PLAN.md -- Textures example app with sub-rect, rotation, flip, and alpha demonstration
 
 ### Phase 8: Text Rendering
 **Goal**: Developer can load fonts and render text strings with specified color and size, with caching to avoid per-frame re-rendering
@@ -189,7 +189,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 4. Input System | 2/2 | Complete | 2026-03-20 |
 | 5. Renderer Core | 2/2 | Complete | 2026-03-21 |
 | 6. Draw Primitives | 0/2 | Not started | - |
-| 7. Textures | 0/TBD | Not started | - |
+| 7. Textures | 0/2 | Not started | - |
 | 8. Text Rendering | 0/2 | Not started | - |
 | 9. Module Integration | 0/TBD | Not started | - |
 | 10. Example Application | 0/TBD | Not started | - |
