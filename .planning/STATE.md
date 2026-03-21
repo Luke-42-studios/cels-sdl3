@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-03-15)
 
 **Core value:** Developers can build 2D graphical applications using the CELS framework with SDL3 as the backend, using the same declarative ECS patterns they know from cels-ncurses
-**Current focus:** Phase 6 in progress -- Draw Primitives. Plan 1 (draw buffer, vtable, systems) complete.
+**Current focus:** Phase 6 complete -- Draw Primitives. Both plans delivered (core + example). Ready for Phase 7.
 
 ## Current Position
 
 Phase: 6 of 10 (Draw Primitives)
-Plan: 1 of 2 in current phase
-Status: In progress
-Last activity: 2026-03-21 -- Completed 06-01-PLAN.md (draw buffer types, vtable, flush system)
+Plan: 2 of 2 in current phase
+Status: Phase complete
+Last activity: 2026-03-21 -- Completed 06-02-PLAN.md (draw primitives example with z-ordering)
 
-Progress: [███████████░░░░░░░░░] 55% (11/20 plans complete)
+Progress: [████████████░░░░░░░░] 60% (12/20 plans complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 11
-- Average duration: 8.5 min
-- Total execution time: 1.57 hours
+- Total plans completed: 12
+- Average duration: 8.2 min
+- Total execution time: 1.60 hours
 
 **By Phase:**
 
@@ -32,10 +32,10 @@ Progress: [███████████░░░░░░░░░] 55% (11
 | 03-frame-loop | 2/2 | 12 min | 6 min |
 | 04-input-system | 2/2 | 58 min | 29 min |
 | 05-renderer-core | 2/2 | 5 min | 2.5 min |
-| 06-draw-primitives | 1/2 | 4 min | 4 min |
+| 06-draw-primitives | 2/2 | 6 min | 3 min |
 
 **Recent Trend:**
-- Last 5 plans: 04-01 (55 min), 04-02 (3 min), 05-01 (3 min), 05-02 (2 min), 06-01 (4 min)
+- Last 5 plans: 04-02 (3 min), 05-01 (3 min), 05-02 (2 min), 06-01 (4 min), 06-02 (2 min)
 - Trend: Phases 5-6 consistently fast (2-4 min per plan) -- established patterns and minimal new infrastructure
 
 *Updated after each plan completion*
@@ -74,6 +74,7 @@ Recent decisions affecting current work:
 - [06-01]: SDL3_DrawBufferTable rebuilt each frame in PreRender for renderer-to-buffer lookup from cross-TU vtable code
 - [06-01]: Simple per-command flush (no batch coalescing) -- SDL3 batches internally on GPU side
 - [06-01]: cel_update required for draw buffer reset and flush (modifies ECS component struct fields, unlike SDL render calls)
+- [06-02]: SDL3_Renderable_use() called after cels_register(SDL3_Engine) but before cels_session for vtable population
 
 ### Pending Todos
 
@@ -88,6 +89,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-21 23:21 UTC
-Stopped at: Completed 06-01-PLAN.md (draw buffer types, vtable, flush system)
+Last session: 2026-03-21 23:26 UTC
+Stopped at: Completed 06-02-PLAN.md (draw primitives example with z-ordering) -- Phase 6 complete
 Resume file: None
