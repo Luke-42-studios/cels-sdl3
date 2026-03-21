@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-03-15)
 
 **Core value:** Developers can build 2D graphical applications using the CELS framework with SDL3 as the backend, using the same declarative ECS patterns they know from cels-ncurses
-**Current focus:** Phase 5 complete -- Renderer Core. Ready for Phase 6 (Draw Primitives).
+**Current focus:** Phase 6 in progress -- Draw Primitives. Plan 1 (draw buffer, vtable, systems) complete.
 
 ## Current Position
 
-Phase: 5 of 10 (Renderer Core)
-Plan: 2 of 2 in current phase
-Status: Phase complete
-Last activity: 2026-03-21 -- Completed 05-02-PLAN.md (renderer example app with interactive clear color)
+Phase: 6 of 10 (Draw Primitives)
+Plan: 1 of 2 in current phase
+Status: In progress
+Last activity: 2026-03-21 -- Completed 06-01-PLAN.md (draw buffer types, vtable, flush system)
 
-Progress: [██████████░░░░░░░░░] 53% (10/19 plans complete)
+Progress: [███████████░░░░░░░░░] 55% (11/20 plans complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 10
-- Average duration: 9.0 min
-- Total execution time: 1.50 hours
+- Total plans completed: 11
+- Average duration: 8.5 min
+- Total execution time: 1.57 hours
 
 **By Phase:**
 
@@ -32,10 +32,11 @@ Progress: [██████████░░░░░░░░░] 53% (10/19
 | 03-frame-loop | 2/2 | 12 min | 6 min |
 | 04-input-system | 2/2 | 58 min | 29 min |
 | 05-renderer-core | 2/2 | 5 min | 2.5 min |
+| 06-draw-primitives | 1/2 | 4 min | 4 min |
 
 **Recent Trend:**
-- Last 5 plans: 03-02 (8 min), 04-01 (55 min), 04-02 (3 min), 05-01 (3 min), 05-02 (2 min)
-- Trend: Phase 5 fastest yet at 5 min total -- well-established patterns enable rapid execution
+- Last 5 plans: 04-01 (55 min), 04-02 (3 min), 05-01 (3 min), 05-02 (2 min), 06-01 (4 min)
+- Trend: Phases 5-6 consistently fast (2-4 min per plan) -- established patterns and minimal new infrastructure
 
 *Updated after each plan completion*
 
@@ -69,6 +70,10 @@ Recent decisions affecting current work:
 - [05-01]: Render systems skip MINIMIZED, CLOSING, CLOSED windows (RESIZING windows still render)
 - [05-02]: cel_update(Component) is a block scope macro providing mutable access -- components are const in cel_each
 - [05-02]: Deferred mutation pattern: collect changes in locals, apply in single cel_update block
+- [06-01]: Draw buffer fields embedded in SDL3_Renderer component (not a separate ECS component)
+- [06-01]: SDL3_DrawBufferTable rebuilt each frame in PreRender for renderer-to-buffer lookup from cross-TU vtable code
+- [06-01]: Simple per-command flush (no batch coalescing) -- SDL3 batches internally on GPU side
+- [06-01]: cel_update required for draw buffer reset and flush (modifies ECS component struct fields, unlike SDL render calls)
 
 ### Pending Todos
 
@@ -83,6 +88,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-21 20:07 UTC
-Stopped at: Completed 05-02-PLAN.md (Renderer example app with interactive clear color)
+Last session: 2026-03-21 23:21 UTC
+Stopped at: Completed 06-01-PLAN.md (draw buffer types, vtable, flush system)
 Resume file: None
