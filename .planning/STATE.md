@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-03-15)
 
 **Core value:** Developers can build 2D graphical applications using the CELS framework with SDL3 as the backend, using the same declarative ECS patterns they know from cels-ncurses
-**Current focus:** Phase 5 in progress -- Renderer Core. Plan 01 complete (renderer lifecycle + render cycle).
+**Current focus:** Phase 5 complete -- Renderer Core. Ready for Phase 6 (Draw Primitives).
 
 ## Current Position
 
 Phase: 5 of 10 (Renderer Core)
-Plan: 1 of 2 in current phase
-Status: In progress
-Last activity: 2026-03-21 -- Completed 05-01-PLAN.md (renderer component, lifecycle, clear/present systems)
+Plan: 2 of 2 in current phase
+Status: Phase complete
+Last activity: 2026-03-21 -- Completed 05-02-PLAN.md (renderer example app with interactive clear color)
 
-Progress: [█████████░░░░░░░░░░] 47% (9/19 plans complete)
+Progress: [██████████░░░░░░░░░] 53% (10/19 plans complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 9
-- Average duration: 9.6 min
-- Total execution time: 1.47 hours
+- Total plans completed: 10
+- Average duration: 9.0 min
+- Total execution time: 1.50 hours
 
 **By Phase:**
 
@@ -31,11 +31,11 @@ Progress: [█████████░░░░░░░░░░] 47% (9/19 
 | 02-window-provider | 2/2 | 8 min | 4 min |
 | 03-frame-loop | 2/2 | 12 min | 6 min |
 | 04-input-system | 2/2 | 58 min | 29 min |
-| 05-renderer-core | 1/2 | 3 min | 3 min |
+| 05-renderer-core | 2/2 | 5 min | 2.5 min |
 
 **Recent Trend:**
-- Last 5 plans: 03-01 (4 min), 03-02 (8 min), 04-01 (55 min), 04-02 (3 min), 05-01 (3 min)
-- Trend: Fast execution continues for well-defined plans following established patterns
+- Last 5 plans: 03-02 (8 min), 04-01 (55 min), 04-02 (3 min), 05-01 (3 min), 05-02 (2 min)
+- Trend: Phase 5 fastest yet at 5 min total -- well-established patterns enable rapid execution
 
 *Updated after each plan completion*
 
@@ -67,6 +67,8 @@ Recent decisions affecting current work:
 - [05-01]: cels_entity_get_component used to read back window pointer in on_create observer for renderer creation
 - [05-01]: No cel_update for render clear/present -- SDL-internal backbuffer mutation is outside ECS tracking
 - [05-01]: Render systems skip MINIMIZED, CLOSING, CLOSED windows (RESIZING windows still render)
+- [05-02]: cel_update(Component) is a block scope macro providing mutable access -- components are const in cel_each
+- [05-02]: Deferred mutation pattern: collect changes in locals, apply in single cel_update block
 
 ### Pending Todos
 
@@ -81,6 +83,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-21 20:03 UTC
-Stopped at: Completed 05-01-PLAN.md (Renderer component, lifecycle, clear/present systems)
+Last session: 2026-03-21 20:07 UTC
+Stopped at: Completed 05-02-PLAN.md (Renderer example app with interactive clear color)
 Resume file: None
