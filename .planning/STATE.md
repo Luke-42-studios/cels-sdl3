@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-03-15)
 
 **Core value:** Developers can build 2D graphical applications using the CELS framework with SDL3 as the backend, using the same declarative ECS patterns they know from cels-ncurses
-**Current focus:** Phase 6 complete -- Draw Primitives. Both plans delivered (core + example). Ready for Phase 7.
+**Current focus:** Phase 7 in progress -- Textures. Plan 1 (core) delivered. Plan 2 (example) next.
 
 ## Current Position
 
-Phase: 6 of 10 (Draw Primitives)
-Plan: 2 of 2 in current phase
-Status: Phase complete
-Last activity: 2026-03-21 -- Completed 06-02-PLAN.md (draw primitives example with z-ordering)
+Phase: 7 of 10 (Textures)
+Plan: 1 of 2 in current phase
+Status: In progress
+Last activity: 2026-03-21 -- Completed 07-01-PLAN.md (texture cache, sprite component, load/render systems)
 
-Progress: [████████████░░░░░░░░] 60% (12/20 plans complete)
+Progress: [█████████████░░░░░░░] 65% (13/20 plans complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 12
-- Average duration: 8.2 min
-- Total execution time: 1.60 hours
+- Total plans completed: 13
+- Average duration: 7.8 min
+- Total execution time: 1.67 hours
 
 **By Phase:**
 
@@ -33,10 +33,11 @@ Progress: [████████████░░░░░░░░] 60% (12
 | 04-input-system | 2/2 | 58 min | 29 min |
 | 05-renderer-core | 2/2 | 5 min | 2.5 min |
 | 06-draw-primitives | 2/2 | 6 min | 3 min |
+| 07-textures | 1/2 | 4 min | 4 min |
 
 **Recent Trend:**
-- Last 5 plans: 04-02 (3 min), 05-01 (3 min), 05-02 (2 min), 06-01 (4 min), 06-02 (2 min)
-- Trend: Phases 5-6 consistently fast (2-4 min per plan) -- established patterns and minimal new infrastructure
+- Last 5 plans: 05-01 (3 min), 05-02 (2 min), 06-01 (4 min), 06-02 (2 min), 07-01 (4 min)
+- Trend: Phases 5-7 consistently fast (2-4 min per plan) -- established patterns and reusable infrastructure
 
 *Updated after each plan completion*
 
@@ -75,6 +76,11 @@ Recent decisions affecting current work:
 - [06-01]: Simple per-command flush (no batch coalescing) -- SDL3 batches internally on GPU side
 - [06-01]: cel_update required for draw buffer reset and flush (modifies ECS component struct fields, unlike SDL render calls)
 - [06-02]: SDL3_Renderable_use() called after cels_register(SDL3_Engine) but before cels_session for vtable population
+- [07-01]: Sprites live on window entities (same entity as renderer) for simplest query pattern
+- [07-01]: Opaque uint32_t handle (1-based index) for texture references -- survives cache invalidation gracefully
+- [07-01]: Cache invalidation zeroes entries without SDL_DestroyTexture -- SDL_DestroyRenderer handles that
+- [07-01]: Per-sprite alpha modulation with reset to prevent state leakage between sprites sharing same texture
+- [07-01]: Declarative asset loading pattern: set path on component, system detects NONE state and loads automatically
 
 ### Pending Todos
 
@@ -89,6 +95,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-21 23:26 UTC
-Stopped at: Completed 06-02-PLAN.md (draw primitives example with z-ordering) -- Phase 6 complete
+Last session: 2026-03-21 23:35 UTC
+Stopped at: Completed 07-01-PLAN.md (texture cache, sprite component, load/render systems) -- Phase 7 plan 1 complete
 Resume file: None
