@@ -100,4 +100,8 @@ if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
     add_executable(renderer examples/renderer/main.c)
     target_link_libraries(renderer PRIVATE cels-sdl3)
     set_target_properties(renderer PROPERTIES C_STANDARD 99 C_STANDARD_REQUIRED ON)
+
+    add_executable(draw-primitives examples/draw-primitives/main.c)
+    target_link_libraries(draw-primitives PRIVATE cels-sdl3)
+    set_target_properties(draw-primitives PROPERTIES C_STANDARD 99 C_STANDARD_REQUIRED ON)
 endif()
