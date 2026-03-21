@@ -24,8 +24,15 @@ void sdl3_renderer_create(cels_entity_t entity,
         return;
     }
 
+    TTF_TextEngine* text_engine = TTF_CreateRendererTextEngine(renderer);
+    if (!text_engine) {
+        SDL_Log("SDL3: TTF_CreateRendererTextEngine failed: %s", SDL_GetError());
+        /* Continue without text engine -- text rendering will be unavailable */
+    }
+
     SDL3_Renderer comp = {
         .renderer    = renderer,
+        .text_engine = text_engine,
         .clear_color = { .r = 100, .g = 149, .b = 237, .a = 255 }
     };
     sdl3_draw_buffer_init(&comp);

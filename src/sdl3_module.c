@@ -222,16 +222,141 @@ CEL_System(SDL3_SpriteRenderSystem, .phase = OnRender) {
 }
 
 /* ============================================================================
+ * Text Render System -- renders text entities each frame
+ * ============================================================================
+ *
+ * Runs at OnRender phase. Text entities have SDL3_Text + SDL3_TextHandle
+ * (separate from window entities). The system finds the first active
+ * renderer/text-engine, then iterates text entities to create, sync,
+ * and draw TTF_Text objects.
+ *
+ * Single-window text assignment: all text draws to the first READY window.
+ */
+
+CEL_System(SDL3_TextRenderSystem, .phase = OnRender) {
+    /* Step 1: Find the first active renderer + text engine */
+    SDL_Renderer* active_renderer = NULL;
+    TTF_TextEngine* active_engine = NULL;
+
+    {
+        cel_query(SDL3_WindowComponent, SDL3_Renderer);
+        cel_each(SDL3_WindowComponent, SDL3_Renderer) {
+            if (SDL3_WindowComponent->state == SDL3_WINDOW_READY ||
+                SDL3_WindowComponent->state == SDL3_WINDOW_RESIZING) {
+                if (SDL3_Renderer->renderer && SDL3_Renderer->text_engine) {
+                    active_renderer = SDL3_Renderer->renderer;
+                    active_engine = SDL3_Renderer->text_engine;
+                    break;  /* Use first active renderer */
+                }
+            }
+        }
+    }
+
+    if (!active_renderer || !active_engine) return;
+
+    /* Step 2: Render all text entities */
+    cel_query(SDL3_Text, SDL3_TextHandle);
+    cel_each(SDL3_Text, SDL3_TextHandle) {
+        /* Create TTF_Text on first encounter */
+        if (!SDL3_TextHandle->ttf_text && SDL3_Text->string) {
+            TTF_Text* created = sdl3_text_create(active_engine,
+                SDL3_Text->font_id, SDL3_Text->string);
+            if (created) {
+                TTF_SetTextColor(created, SDL3_Text->color.r,
+                    SDL3_Text->color.g, SDL3_Text->color.b,
+                    SDL3_Text->color.a);
+                if (SDL3_Text->wrap_width > 0) {
+                    TTF_SetTextWrapWidth(created, SDL3_Text->wrap_width);
+                }
+                cel_update(SDL3_TextHandle) {
+                    SDL3_TextHandle->ttf_text = created;
+                    SDL3_TextHandle->last_string = SDL3_Text->string;
+                    SDL3_TextHandle->last_color = SDL3_Text->color;
+                    SDL3_TextHandle->last_wrap = SDL3_Text->wrap_width;
+                    SDL3_TextHandle->last_font_id = SDL3_Text->font_id;
+                }
+            }
+        }
+
+        /* Sync changes if properties changed */
+        if (SDL3_TextHandle->ttf_text) {
+            bool dirty = sdl3_text_sync(SDL3_TextHandle->ttf_text,
+                SDL3_Text, SDL3_TextHandle);
+            if (dirty) {
+                cel_update(SDL3_TextHandle) {
+                    SDL3_TextHandle->last_string = SDL3_Text->string;
+                    SDL3_TextHandle->last_color = SDL3_Text->color;
+                    SDL3_TextHandle->last_wrap = SDL3_Text->wrap_width;
+                    SDL3_TextHandle->last_font_id = SDL3_Text->font_id;
+                }
+            }
+
+            /* Compute draw position based on alignment */
+            float draw_x = SDL3_Text->x;
+            float draw_y = SDL3_Text->y;
+
+            if (SDL3_Text->align != SDL3_TEXT_ALIGN_LEFT) {
+                int w = 0, h = 0;
+                TTF_GetTextSize(SDL3_TextHandle->ttf_text, &w, &h);
+                if (SDL3_Text->align == SDL3_TEXT_ALIGN_CENTER) {
+                    draw_x -= (float)w / 2.0f;
+                } else if (SDL3_Text->align == SDL3_TEXT_ALIGN_RIGHT) {
+                    draw_x -= (float)w;
+                }
+            }
+
+            TTF_DrawRendererText(SDL3_TextHandle->ttf_text, draw_x, draw_y);
+        }
+    }
+}
+
+/* ============================================================================
  * Window State System -- per-frame state machine driver
  * ============================================================================ */
 
 CEL_System(SDL3_WindowStateSystem, .phase = OnLoad) {
+    /* First pass: check if any window is CLOSING and destroy text handles.
+     * TTF_Text objects MUST be destroyed before the text engine and renderer.
+     * Destruction order: TTF_Text -> TTF_TextEngine -> SDL_Renderer -> SDL_Window */
+    bool any_closing = false;
+    {
+        cel_query(SDL3_WindowComponent);
+        cel_each(SDL3_WindowComponent) {
+            if (SDL3_WindowComponent->state == SDL3_WINDOW_CLOSING) {
+                any_closing = true;
+            }
+        }
+    }
+
+    if (any_closing) {
+        cel_query(SDL3_TextHandle);
+        cel_each(SDL3_TextHandle) {
+            if (SDL3_TextHandle->ttf_text) {
+                sdl3_text_destroy(SDL3_TextHandle->ttf_text);
+                cel_update(SDL3_TextHandle) {
+                    SDL3_TextHandle->ttf_text = NULL;
+                }
+            }
+        }
+    }
+
+    /* Second pass: window state transitions */
+    {
     cel_query(SDL3_WindowComponent, SDL3_Renderer);
     cel_each(SDL3_WindowComponent, SDL3_Renderer) {
         if (SDL3_WindowComponent->state == SDL3_WINDOW_CLOSING) {
             /* CLOSING -> CLOSED: one frame has elapsed since close request.
-             * Destroy renderer BEFORE window (SDL requirement). */
+             * Destroy text engine BEFORE renderer, renderer BEFORE window. */
             bool owns_context = SDL3_WindowComponent->context_bound;
+
+            /* Destroy text engine after text handles (first pass above) */
+            if (SDL3_Renderer->text_engine) {
+                TTF_DestroyRendererTextEngine(SDL3_Renderer->text_engine);
+                cel_update(SDL3_Renderer) {
+                    SDL3_Renderer->text_engine = NULL;
+                }
+            }
+
             if (SDL3_Renderer->renderer) {
                 /* Invalidate all cached textures for this renderer.
                  * Does NOT call SDL_DestroyTexture -- SDL_DestroyRenderer
@@ -261,6 +386,7 @@ CEL_System(SDL3_WindowStateSystem, .phase = OnLoad) {
             }
         }
     }
+    } /* end second-pass block scope */
 }
 
 /* ============================================================================
@@ -373,10 +499,11 @@ CEL_System(SDL3_RenderPresentSystem, .phase = PostRender) {
  * Registration order determines system execution within the same phase:
  *   1.  InputSystem (drains events, routes to windows, fills queues)
  *   1b. TextureLoadSystem (loads textures for sprites with NONE state)
- *   2.  WindowState (CLOSING -> CLOSED transitions, texture cache cleanup)
+ *   2.  WindowState (CLOSING -> CLOSED transitions, text/texture/renderer cleanup)
  *   3.  FrameState (checks if all windows closed)
  *   4.  RenderClear (PreRender phase -- clears each window, resets draw buffers)
  *   4b. SpriteRenderSystem (OnRender phase -- renders READY sprites)
+ *   4c. TextRenderSystem (OnRender phase -- renders text entities)
  *   5.  DrawFlush (PostRender phase -- sorts and flushes draw commands)
  *   6.  RenderPresent (PostRender phase -- presents each window)
  */
@@ -389,9 +516,11 @@ CEL_Module(SDL3_Engine, init) {
     cels_register(SDL3_WindowConfig, SDL3_WindowComponent, SDL3_EventQueue,
                   SDL3_Renderer, SDL3_Sprite,
                   SDL3_WindowLC, SDL3_WindowStateSystem);
+    cels_register(SDL3_Text, SDL3_TextHandle);
     cels_register(SDL3_FrameStateSystem);
     cels_register(SDL3_RenderClearSystem);
     cels_register(SDL3_SpriteRenderSystem);
+    cels_register(SDL3_TextRenderSystem);
     cels_register(SDL3_DrawFlushSystem);
     cels_register(SDL3_RenderPresentSystem);
 
@@ -413,6 +542,12 @@ CEL_Module(SDL3_Engine, init) {
      * need the component ID initialized before any system body runs. */
     cels_ensure_component(&SDL3_Sprite_id, "SDL3_Sprite",
                           sizeof(SDL3_Sprite), CELS_ALIGNOF(SDL3_Sprite));
+
+    /* Text components -- systems query SDL3_Text and SDL3_TextHandle */
+    cels_ensure_component(&SDL3_Text_id, "SDL3_Text",
+                          sizeof(SDL3_Text), CELS_ALIGNOF(SDL3_Text));
+    cels_ensure_component(&SDL3_TextHandle_id, "SDL3_TextHandle",
+                          sizeof(SDL3_TextHandle), CELS_ALIGNOF(SDL3_TextHandle));
 }
 
 /* ============================================================================

@@ -74,6 +74,9 @@ void sdl3_ensure_init(void) {
 void sdl3_shutdown(void) {
     if (!SDL3_ContextState.initialized) return;
 
+    /* Close all fonts before shutting down TTF */
+    sdl3_fonts_close_all();
+
     /* Shutdown in reverse init order */
     TTF_Quit();     /* TTF first -- depends on SDL internals */
     /* NOTE: No IMG_Quit() -- SDL3_image has no quit function */
