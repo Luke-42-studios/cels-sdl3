@@ -140,9 +140,13 @@ CEL_System(SDL3_WindowStateSystem, .phase = OnLoad) {
              * Destroy renderer BEFORE window (SDL requirement). */
             bool owns_context = SDL3_WindowComponent->context_bound;
             if (SDL3_Renderer->renderer) {
+                sdl3_draw_buffer_destroy(SDL3_Renderer);
                 sdl3_renderer_destroy(SDL3_Renderer->renderer);
                 cel_update(SDL3_Renderer) {
                     SDL3_Renderer->renderer = NULL;
+                    SDL3_Renderer->draw_cmds = NULL;
+                    SDL3_Renderer->draw_count = 0;
+                    SDL3_Renderer->draw_capacity = 0;
                 }
             }
             if (SDL3_WindowComponent->window) {
@@ -197,6 +201,8 @@ CEL_System(SDL3_FrameStateSystem, .phase = OnLoad) {
  */
 
 CEL_System(SDL3_RenderClearSystem, .phase = PreRender) {
+    sdl3_draw_table_clear();
+
     cel_query(SDL3_WindowComponent, SDL3_Renderer);
     cel_each(SDL3_WindowComponent, SDL3_Renderer) {
         /* Skip windows that should not render */
@@ -204,12 +210,44 @@ CEL_System(SDL3_RenderClearSystem, .phase = PreRender) {
             SDL3_WindowComponent->state == SDL3_WINDOW_CLOSING ||
             SDL3_WindowComponent->state == SDL3_WINDOW_CLOSED) continue;
 
+        /* Register renderer-to-buffer mapping for vtable lookups during OnRender,
+         * and reset draw buffer for this frame */
+        cel_update(SDL3_Renderer) {
+            sdl3_draw_table_add(SDL3_Renderer->renderer, SDL3_Renderer);
+            SDL3_Renderer->draw_count = 0;
+            SDL3_Renderer->draw_next_order = 0;
+        }
+
         SDL_SetRenderDrawColor(SDL3_Renderer->renderer,
             SDL3_Renderer->clear_color.r,
             SDL3_Renderer->clear_color.g,
             SDL3_Renderer->clear_color.b,
             SDL3_Renderer->clear_color.a);
         SDL_RenderClear(SDL3_Renderer->renderer);
+    }
+}
+
+/* ============================================================================
+ * Draw Flush System -- sorts draw buffer by z-index and flushes to SDL3
+ * ============================================================================
+ *
+ * Runs at PostRender phase BEFORE RenderPresentSystem (registration order).
+ * Sorts buffered draw commands by (z ascending, creation order ascending)
+ * and issues the actual SDL3 draw calls.
+ */
+
+CEL_System(SDL3_DrawFlushSystem, .phase = PostRender) {
+    cel_query(SDL3_WindowComponent, SDL3_Renderer);
+    cel_each(SDL3_WindowComponent, SDL3_Renderer) {
+        if (SDL3_WindowComponent->state == SDL3_WINDOW_MINIMIZED ||
+            SDL3_WindowComponent->state == SDL3_WINDOW_CLOSING ||
+            SDL3_WindowComponent->state == SDL3_WINDOW_CLOSED) continue;
+
+        if (SDL3_Renderer->draw_count == 0) continue;
+
+        cel_update(SDL3_Renderer) {
+            sdl3_draw_buffer_flush(SDL3_Renderer);
+        }
     }
 }
 
@@ -239,8 +277,9 @@ CEL_System(SDL3_RenderPresentSystem, .phase = PostRender) {
  *   1. InputSystem (drains events, routes to windows, fills queues)
  *   2. WindowState (CLOSING -> CLOSED transitions)
  *   3. FrameState (checks if all windows closed)
- *   4. RenderClear (PreRender phase -- clears each window)
- *   5. RenderPresent (PostRender phase -- presents each window)
+ *   4. RenderClear (PreRender phase -- clears each window, resets draw buffers)
+ *   5. DrawFlush (PostRender phase -- sorts and flushes draw commands)
+ *   6. RenderPresent (PostRender phase -- presents each window)
  */
 
 CEL_Module(SDL3_Engine, init) {
@@ -252,6 +291,7 @@ CEL_Module(SDL3_Engine, init) {
                   SDL3_WindowLC, SDL3_WindowStateSystem);
     cels_register(SDL3_FrameStateSystem);
     cels_register(SDL3_RenderClearSystem);
+    cels_register(SDL3_DrawFlushSystem);
     cels_register(SDL3_RenderPresentSystem);
 
     /* Eagerly initialize SDL3_EventQueue_id so the window creation observer

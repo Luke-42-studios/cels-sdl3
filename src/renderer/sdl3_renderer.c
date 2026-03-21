@@ -28,6 +28,7 @@ void sdl3_renderer_create(cels_entity_t entity,
         .renderer    = renderer,
         .clear_color = { .r = 100, .g = 149, .b = 237, .a = 255 }
     };
+    sdl3_draw_buffer_init(&comp);
     cels_entity_set_component(entity, component_id, &comp, sizeof(comp));
 }
 
