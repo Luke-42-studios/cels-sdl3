@@ -89,4 +89,38 @@ extern void sdl3_draw_table_clear(void);
 extern void sdl3_draw_table_add(SDL_Renderer* renderer, SDL3_Renderer* comp);
 extern SDL3_Renderer* sdl3_draw_table_find(SDL_Renderer* renderer);
 
+/* ============================================================================
+ * Texture cache -- per-renderer texture caching with reference counting
+ * ============================================================================ */
+
+#define SDL3_TEXTURE_CACHE_CAPACITY 128
+#define SDL3_TEXTURE_PATH_MAX 256
+
+typedef struct SDL3_TextureCacheEntry {
+    char          path[SDL3_TEXTURE_PATH_MAX];  /* Resolved file path (key) */
+    SDL_Texture*  texture;                       /* GPU texture (NULL if slot empty) */
+    float         width;                         /* Texture width in pixels */
+    float         height;                        /* Texture height in pixels */
+    int           ref_count;                     /* Number of sprites using this texture */
+} SDL3_TextureCacheEntry;
+
+typedef struct SDL3_TextureCache {
+    SDL3_TextureCacheEntry entries[SDL3_TEXTURE_CACHE_CAPACITY];
+    int                    count;  /* Number of occupied slots */
+} SDL3_TextureCache;
+
+/* Texture cache lifecycle */
+extern SDL3_TextureCache* sdl3_texture_cache_for_renderer(SDL_Renderer* renderer);
+extern uint32_t sdl3_texture_cache_load(SDL3_TextureCache* cache,
+                                         SDL_Renderer* renderer,
+                                         const char* path);
+extern SDL_Texture* sdl3_texture_cache_get(const SDL3_TextureCache* cache,
+                                            uint32_t handle);
+extern void sdl3_texture_cache_get_size(const SDL3_TextureCache* cache,
+                                         uint32_t handle,
+                                         float* w, float* h);
+extern void sdl3_texture_cache_release(SDL3_TextureCache* cache, uint32_t handle);
+extern void sdl3_texture_cache_invalidate(SDL3_TextureCache* cache);
+extern void sdl3_texture_cache_remove_renderer(SDL_Renderer* renderer);
+
 #endif /* CELS_SDL3_INTERNAL_H */

@@ -19,6 +19,7 @@
 #define CELS_SDL3_H
 #include <cels/cels.h>
 #include <SDL3/SDL.h>
+#include <SDL3_image/SDL_image.h>
 #include <stdbool.h>
 
 CEL_Module(SDL3_Engine);
@@ -279,5 +280,57 @@ extern const SDL3_Renderable* sdl3_renderable(void);
 extern void SDL3_Renderable_use(void);
 
 extern void sdl3_set_blend_mode(SDL_Renderer* renderer, SDL_BlendMode mode);
+
+/* ============================================================================
+ * Texture Types
+ * ============================================================================
+ *
+ * Texture loading state machine and sprite component for image rendering.
+ * Developer sets texture_path on an SDL3_Sprite; a loading system detects
+ * NONE state and loads via IMG_LoadTexture into a per-renderer cache.
+ */
+
+/*
+ * Texture loading state machine.
+ *
+ * NONE     -> LOADING -> READY   (success)
+ * NONE     -> LOADING -> FAILED  (file not found, format error)
+ * READY    -> UNLOADED           (renderer destroyed)
+ */
+typedef enum SDL3_TextureState {
+    SDL3_TEXTURE_NONE = 0,      /* No texture path set */
+    SDL3_TEXTURE_LOADING,       /* Path set, loading in progress */
+    SDL3_TEXTURE_READY,         /* Texture loaded, renderable */
+    SDL3_TEXTURE_FAILED,        /* Load failed (path invalid, format unsupported) */
+    SDL3_TEXTURE_UNLOADED       /* Renderer destroyed, texture invalidated */
+} SDL3_TextureState;
+
+/*
+ * Sprite component for image-based rendering.
+ *
+ * Developer sets texture_path and dst_rect; the TextureLoadSystem handles
+ * the rest. texture_handle is an opaque 1-based index into the per-renderer
+ * texture cache (0 = none). State tracks loading progress.
+ *
+ * Rendering parameters support sub-image (spritesheet), rotation, flip,
+ * and per-sprite alpha modulation.
+ */
+CEL_Component(SDL3_Sprite) {
+    /* Texture reference */
+    const char*        texture_path;    /* File path (relative to asset base dir, or absolute) */
+    uint32_t           texture_handle;  /* Opaque 1-based index into per-renderer cache (0 = none) */
+    SDL3_TextureState  state;           /* Loading state machine */
+
+    /* Rendering parameters */
+    SDL_FRect          src_rect;        /* Source rect (0,0,0,0 = entire texture) */
+    SDL_FRect          dst_rect;        /* Destination rect (position + size in pixels) */
+    double             angle;           /* Rotation in degrees (clockwise) */
+    SDL_FPoint         center;          /* Rotation center (0,0 = use dst_rect center) */
+    SDL_FlipMode       flip;            /* SDL_FLIP_NONE / HORIZONTAL / VERTICAL */
+    Uint8              alpha;           /* Per-sprite alpha (255 = opaque, 0 = invisible) */
+};
+
+/* Texture asset directory configuration */
+extern void sdl3_set_asset_base_dir(const char* path);
 
 #endif /* CELS_SDL3_H */
