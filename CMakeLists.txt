@@ -117,4 +117,8 @@ if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
         ${CMAKE_CURRENT_SOURCE_DIR}/examples/textures/assets
         $<TARGET_FILE_DIR:textures>/assets
     )
+
+    add_executable(text examples/text/main.c)
+    target_link_libraries(text PRIVATE cels-sdl3)
+    set_target_properties(text PROPERTIES C_STANDARD 99 C_STANDARD_REQUIRED ON)
 endif()
