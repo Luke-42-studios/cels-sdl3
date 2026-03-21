@@ -94,11 +94,11 @@ Plans:
   2. Each window runs a clear/present cycle every frame (clear to background color, then present)
   3. Developer can set the clear color for a window and see it reflected immediately
   4. Multiple windows each render independently with their own clear color
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] 05-01: TBD
-- [ ] 05-02: TBD
+- [ ] 05-01-PLAN.md -- SDL3_Renderer component, renderer create/destroy, clear/present systems, module wiring
+- [ ] 05-02-PLAN.md -- Renderer example app with interactive clear color changes via keyboard
 
 ### Phase 6: Draw Primitives
 **Goal**: Developer can draw shapes (filled rects, outlined rects, lines) using the CELS Feature/Provider rendering model
@@ -187,7 +187,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 2. Window Provider | 2/2 | Complete | 2026-03-15 |
 | 3. Frame Loop | 2/2 | Complete | 2026-03-16 |
 | 4. Input System | 2/2 | Complete | 2026-03-20 |
-| 5. Renderer Core | 0/TBD | Not started | - |
+| 5. Renderer Core | 0/2 | Not started | - |
 | 6. Draw Primitives | 0/TBD | Not started | - |
 | 7. Textures | 0/TBD | Not started | - |
 | 8. Text Rendering | 0/TBD | Not started | - |
