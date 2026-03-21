@@ -20,6 +20,7 @@
 #include <cels/cels.h>
 #include <SDL3/SDL.h>
 #include <SDL3_image/SDL_image.h>
+#include <SDL3_ttf/SDL_ttf.h>
 #include <stdbool.h>
 
 CEL_Module(SDL3_Engine);
@@ -253,13 +254,14 @@ typedef struct SDL3_DrawCmd {
  * coupling with the renderer.
  */
 CEL_Component(SDL3_Renderer) {
-    SDL_Renderer* renderer;
-    SDL_Color     clear_color;
+    SDL_Renderer*   renderer;
+    TTF_TextEngine* text_engine;
+    SDL_Color       clear_color;
     /* Draw buffer -- embedded for tight coupling with renderer */
-    SDL3_DrawCmd* draw_cmds;
-    int           draw_count;
-    int           draw_capacity;
-    int           draw_next_order;
+    SDL3_DrawCmd*   draw_cmds;
+    int             draw_count;
+    int             draw_capacity;
+    int             draw_next_order;
 };
 
 /* ============================================================================
@@ -332,5 +334,53 @@ CEL_Component(SDL3_Sprite) {
 
 /* Texture asset directory configuration */
 extern void sdl3_set_asset_base_dir(const char* path);
+
+/* ============================================================================
+ * Text Rendering Types
+ * ============================================================================
+ *
+ * Developer sets SDL3_Text on an entity to render text each frame.
+ * SDL3_TextHandle is managed by the text system -- not set by developers.
+ *
+ * Each fontId encodes a specific family+size combination. Load fonts with
+ * sdl3_font_load(). String pointers must be stable (static or heap) -- the
+ * component stores a pointer, not a copy.
+ *
+ *   sdl3_font_load(0, "fonts/Roboto.ttf", 16.0f);
+ *   cel_has(SDL3_Text, .string = "Hello", .font_id = 0,
+ *           .color = {255,255,255,255}, .x = 100, .y = 50);
+ */
+
+/* SDL3_Text alignment */
+typedef enum SDL3_TextAlign {
+    SDL3_TEXT_ALIGN_LEFT = 0,
+    SDL3_TEXT_ALIGN_CENTER,
+    SDL3_TEXT_ALIGN_RIGHT,
+} SDL3_TextAlign;
+
+/* Developer-facing text component */
+CEL_Component(SDL3_Text) {
+    const char*     string;     /* text content -- must be stable pointer (static or heap) */
+    int             font_id;    /* index into global font array */
+    SDL_Color       color;      /* text color (default: white {255,255,255,255}) */
+    float           x, y;       /* render position (top-left) */
+    SDL3_TextAlign  align;      /* horizontal alignment relative to x position */
+    int             wrap_width; /* 0 = no wrap, >0 = wrap at this pixel width */
+};
+
+/* Internal cached handle -- managed by text system, not set by developer */
+CEL_Component(SDL3_TextHandle) {
+    TTF_Text*    ttf_text;     /* cached TTF_Text object */
+    const char*  last_string;  /* last synced string pointer for change detection */
+    SDL_Color    last_color;   /* last synced color */
+    int          last_wrap;    /* last synced wrap width */
+    int          last_font_id; /* last synced font_id */
+};
+
+/* Font management */
+#define SDL3_MAX_FONTS 32
+extern bool sdl3_font_load(int font_id, const char* path, float pt_size);
+extern void sdl3_font_close(int font_id);
+extern void sdl3_fonts_close_all(void);
 
 #endif /* CELS_SDL3_H */

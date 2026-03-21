@@ -123,4 +123,15 @@ extern void sdl3_texture_cache_release(SDL3_TextureCache* cache, uint32_t handle
 extern void sdl3_texture_cache_invalidate(SDL3_TextureCache* cache);
 extern void sdl3_texture_cache_remove_renderer(SDL_Renderer* renderer);
 
+/* ============================================================================
+ * Text system -- called from sdl3_module.c systems
+ * ============================================================================ */
+
+extern TTF_Font* sdl3_font_get(int font_id);
+extern TTF_Text* sdl3_text_create(TTF_TextEngine* engine, int font_id,
+                                   const char* string);
+extern bool      sdl3_text_sync(TTF_Text* ttf_text, const SDL3_Text* text,
+                                 const SDL3_TextHandle* handle);
+extern void      sdl3_text_destroy(TTF_Text* ttf_text);
+
 #endif /* CELS_SDL3_INTERNAL_H */
