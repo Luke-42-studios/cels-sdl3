@@ -16,7 +16,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 2: Window Provider** - Window creation as ECS entity with full lifecycle state machine
 - [x] **Phase 3: Frame Loop** - CELS-integrated frame loop with delta time and event pumping
 - [x] **Phase 4: Input System** - Event buffering, raw queue as ECS component, window event routing
-- [ ] **Phase 5: Renderer Core** - SDL_Renderer per window with clear/present cycle
+- [x] **Phase 5: Renderer Core** - SDL_Renderer per window with clear/present cycle
 - [ ] **Phase 6: Draw Primitives** - Feature/Provider model with filled rects, outlined rects, and lines
 - [ ] **Phase 7: Textures** - SDL3_image loading and rendering with renderer affinity
 - [ ] **Phase 8: Text Rendering** - SDL3_ttf font loading, text rendering, and caching
@@ -97,8 +97,8 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 05-01-PLAN.md -- SDL3_Renderer component, renderer create/destroy, clear/present systems, module wiring
-- [ ] 05-02-PLAN.md -- Renderer example app with interactive clear color changes via keyboard
+- [x] 05-01-PLAN.md -- SDL3_Renderer component, renderer create/destroy, clear/present systems, module wiring
+- [x] 05-02-PLAN.md -- Renderer example app with interactive clear color changes via keyboard
 
 ### Phase 6: Draw Primitives
 **Goal**: Developer can draw shapes (filled rects, outlined rects, lines) using the CELS Feature/Provider rendering model
@@ -187,7 +187,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 2. Window Provider | 2/2 | Complete | 2026-03-15 |
 | 3. Frame Loop | 2/2 | Complete | 2026-03-16 |
 | 4. Input System | 2/2 | Complete | 2026-03-20 |
-| 5. Renderer Core | 0/2 | Not started | - |
+| 5. Renderer Core | 2/2 | Complete | 2026-03-21 |
 | 6. Draw Primitives | 0/TBD | Not started | - |
 | 7. Textures | 0/TBD | Not started | - |
 | 8. Text Rendering | 0/TBD | Not started | - |

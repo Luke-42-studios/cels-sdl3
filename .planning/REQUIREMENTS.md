@@ -22,8 +22,8 @@
 
 ### Rendering
 
-- [ ] **RNDR-01**: SDL_Renderer created per window entity, paired with its SDL_Window
-- [ ] **RNDR-02**: Clear/present cycle runs per window per frame (clear background, draw, present)
+- [x] **RNDR-01**: SDL_Renderer created per window entity, paired with its SDL_Window
+- [x] **RNDR-02**: Clear/present cycle runs per window per frame (clear background, draw, present)
 - [ ] **RNDR-03**: Feature/Provider model — CEL_DefineFeature(Renderable), CEL_Provides(SDL3, Renderable, ...)
 - [ ] **RNDR-04**: Developer can draw filled rectangles with color at position/size
 - [ ] **RNDR-05**: Developer can draw outlined rectangles with color at position/size
