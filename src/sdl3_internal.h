@@ -32,6 +32,12 @@ extern void  sdl3_cap_frame_rate(Uint64 frame_start_ns, int target_fps);
 extern void  sdl3_frame_set_running(bool running);
 extern void  sdl3_set_target_fps(int fps);
 
+/* Renderer lifecycle -- called from sdl3_module.c observer/systems */
+extern void sdl3_renderer_create(cels_entity_t entity,
+                                  SDL_Window* window,
+                                  cels_entity_t component_id);
+extern void sdl3_renderer_destroy(SDL_Renderer* renderer);
+
 /* Input system -- called from sdl3_module.c systems
  *
  * The drain function cannot use cel_query/cel_each (per-TU static ID

@@ -203,4 +203,22 @@ CEL_Component(SDL3_EventQueue) {
     int       count;
 };
 
+/* ============================================================================
+ * Renderer Types
+ * ============================================================================ */
+
+/*
+ * Per-window renderer component. Attached alongside SDL3_WindowComponent
+ * on each window entity. Created automatically in the window lifecycle
+ * observer; destroyed before the window during CLOSING->CLOSED transition.
+ *
+ * clear_color: background color used by RenderClearSystem each frame.
+ * Default: cornflower blue (100, 149, 237, 255). Changeable at runtime
+ * by any system -- takes effect next frame.
+ */
+CEL_Component(SDL3_Renderer) {
+    SDL_Renderer* renderer;
+    SDL_Color     clear_color;
+};
+
 #endif /* CELS_SDL3_H */
