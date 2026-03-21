@@ -171,10 +171,11 @@ Plans:
   3. Example app draws at least one filled rect, one outlined rect, and one line on screen
   4. Example app loads and renders a texture from a PNG file
   5. Example app loads a TTF font and renders text on screen
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] 10-01: TBD
+- [ ] 10-01-PLAN.md -- Assets, demo app implementation (landscape scene with all v1 features), CMake integration
+- [ ] 10-02-PLAN.md -- Interactive verification: run demo, confirm all features visually
 
 ## Progress
 
@@ -192,4 +193,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 7. Textures | 0/2 | Not started | - |
 | 8. Text Rendering | 0/2 | Not started | - |
 | 9. Module Integration | 0/2 | Not started | - |
-| 10. Example Application | 0/TBD | Not started | - |
+| 10. Example Application | 0/2 | Not started | - |
