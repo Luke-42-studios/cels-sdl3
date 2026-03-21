@@ -50,6 +50,7 @@ typedef struct SDL3_WindowTable {
     SDL3_WindowEntry entries[SDL3_MAX_WINDOWS];
     int              count;
     int              minimized_count;
+    bool             window_dirty;  /* set by drain when window events modify component */
 } SDL3_WindowTable;
 
 extern void sdl3_input_drain_events(SDL3_WindowTable* table);

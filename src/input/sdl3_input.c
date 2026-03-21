@@ -132,6 +132,7 @@ static bool route_event(SDL3_WindowTable* table, const SDL_Event* event)
             sdl3_window_handle_event(
                 entry->comp, event->type,
                 event->window.data1, event->window.data2);
+            table->window_dirty = true;
         }
         return false;
     }

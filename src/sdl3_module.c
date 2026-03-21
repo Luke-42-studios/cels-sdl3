@@ -110,6 +110,12 @@ CEL_System(SDL3_InputSystem, .phase = OnLoad) {
     }
 
     sdl3_input_drain_events(&table);
+
+    /* Notify reactivity system so cel_watch(entity, SDL3_WindowComponent)
+     * triggers recomposition when window events change state/size */
+    if (table.window_dirty) {
+        cels_component_notify_change(SDL3_WindowComponent_id);
+    }
 }
 
 /* ============================================================================
@@ -130,6 +136,7 @@ CEL_System(SDL3_WindowStateSystem, .phase = OnLoad) {
                 SDL3_WindowComponent->window = NULL;
                 SDL3_WindowComponent->state = SDL3_WINDOW_CLOSED;
             }
+            cels_component_notify_change(SDL3_WindowComponent_id);
             /* Context-bound window closed: shut down SDL3 and exit loop */
             if (owns_context) {
                 sdl3_shutdown();
