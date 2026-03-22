@@ -27,7 +27,7 @@ void sdl3_window_create(cels_entity_t entity,
 
     SDL_Window* window = SDL_CreateWindow(title, w, h, flags);
     if (!window) {
-        SDL_Log("SDL3: SDL_CreateWindow failed: %s", SDL_GetError());
+        sdl3_report_error("create_window");
         return;
     }
 

@@ -22,8 +22,7 @@ static TTF_Font* g_fonts[SDL3_MAX_FONTS] = {0};
 bool sdl3_font_load(int font_id, const char* path, float pt_size)
 {
     if (font_id < 0 || font_id >= SDL3_MAX_FONTS) {
-        SDL_Log("SDL3: sdl3_font_load: font_id %d out of range [0, %d)",
-                font_id, SDL3_MAX_FONTS);
+        sdl3_report_error("font_load_invalid_id");
         return false;
     }
 
@@ -35,8 +34,7 @@ bool sdl3_font_load(int font_id, const char* path, float pt_size)
 
     TTF_Font* font = TTF_OpenFont(path, pt_size);
     if (!font) {
-        SDL_Log("SDL3: TTF_OpenFont failed for '%s' at %.1fpt: %s",
-                path, pt_size, SDL_GetError());
+        sdl3_report_error("font_load");
         return false;
     }
 
@@ -77,13 +75,13 @@ TTF_Text* sdl3_text_create(TTF_TextEngine* engine, int font_id,
 {
     TTF_Font* font = sdl3_font_get(font_id);
     if (!font) {
-        SDL_Log("SDL3: sdl3_text_create: no font loaded at font_id %d", font_id);
+        sdl3_report_error("text_create_no_font");
         return NULL;
     }
 
     TTF_Text* text = TTF_CreateText(engine, font, string, 0);
     if (!text) {
-        SDL_Log("SDL3: TTF_CreateText failed: %s", SDL_GetError());
+        sdl3_report_error("text_create");
         return NULL;
     }
 

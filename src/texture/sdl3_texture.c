@@ -65,7 +65,7 @@ SDL3_TextureCache* sdl3_texture_cache_for_renderer(SDL_Renderer* renderer) {
 
     /* Create new entry */
     if (s_cache_count >= SDL3_MAX_RENDERERS) {
-        SDL_Log("SDL3: Texture cache table full (%d renderers)", SDL3_MAX_RENDERERS);
+        sdl3_report_error("texture_cache_table_full");
         return NULL;
     }
 
@@ -122,7 +122,7 @@ uint32_t sdl3_texture_cache_load(SDL3_TextureCache* cache,
     }
     if (slot < 0) {
         if (cache->count >= SDL3_TEXTURE_CACHE_CAPACITY) {
-            SDL_Log("SDL3: Texture cache full (%d entries)", SDL3_TEXTURE_CACHE_CAPACITY);
+            sdl3_report_error("texture_cache_full");
             SDL_DestroyTexture(tex);
             return 0;
         }

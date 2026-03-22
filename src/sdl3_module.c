@@ -160,8 +160,7 @@ CEL_System(SDL3_TextureLoadSystem, .phase = OnLoad) {
                 SDL3_Sprite->state = SDL3_TEXTURE_READY;
             } else {
                 SDL3_Sprite->state = SDL3_TEXTURE_FAILED;
-                SDL_Log("SDL3: Failed to load texture '%s': %s",
-                        SDL3_Sprite->texture_path, SDL_GetError());
+                sdl3_report_error("texture_load");
             }
         }
     }

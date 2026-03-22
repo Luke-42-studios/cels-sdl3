@@ -26,6 +26,32 @@ static struct SDL3_ContextState SDL3_ContextState = {
     .ttf_ready = false
 };
 
+/* Error callback -- NULL means use default SDL_Log handler */
+static SDL3_ErrorCallback s_error_callback = NULL;
+
+/* Configurable init flags -- 0 means SDL_INIT_VIDEO */
+static Uint32 s_init_flags = 0;
+
+void sdl3_set_error_callback(SDL3_ErrorCallback callback) {
+    s_error_callback = callback;
+}
+
+void sdl3_set_init_flags(Uint32 flags) {
+    s_init_flags = flags;
+}
+
+void sdl3_report_error(const char* context) {
+    const char* msg = SDL_GetError();
+    if (!msg || msg[0] == '\0') {
+        msg = "(no SDL error)";
+    }
+    if (s_error_callback) {
+        s_error_callback(context, msg);
+    } else {
+        SDL_Log("SDL3 error [%s]: %s", context, msg);
+    }
+}
+
 /* ============================================================================
  * Init
  * ============================================================================ */
@@ -38,17 +64,22 @@ void sdl3_init(const SDL3_ContextConfig* config) {
     SDL3_ContextState_register();
     cels_state_bind(SDL3_ContextState);
 
-    /* Initialize SDL3 VIDEO subsystem (implies EVENTS) */
-    if (config->video) {
-        if (!SDL_Init(SDL_INIT_VIDEO)) {
-            SDL_Log("SDL_Init failed: %s", SDL_GetError());
+    /* Determine init flags: explicit flags take priority over config->video */
+    Uint32 flags = s_init_flags;
+    if (flags == 0 && config->video) {
+        flags = SDL_INIT_VIDEO;
+    }
+
+    if (flags) {
+        if (!SDL_Init(flags)) {
+            sdl3_report_error("sdl_init");
             return;
         }
     }
 
     /* Initialize SDL3_ttf */
     if (!TTF_Init()) {
-        SDL_Log("TTF_Init failed: %s", SDL_GetError());
+        sdl3_report_error("ttf_init");
         SDL_Quit();
         return;
     }

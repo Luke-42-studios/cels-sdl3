@@ -20,13 +20,13 @@ void sdl3_renderer_create(cels_entity_t entity,
 
     SDL_Renderer* renderer = SDL_CreateRenderer(window, NULL);
     if (!renderer) {
-        SDL_Log("SDL3: SDL_CreateRenderer failed: %s", SDL_GetError());
+        sdl3_report_error("create_renderer");
         return;
     }
 
     TTF_TextEngine* text_engine = TTF_CreateRendererTextEngine(renderer);
     if (!text_engine) {
-        SDL_Log("SDL3: TTF_CreateRendererTextEngine failed: %s", SDL_GetError());
+        sdl3_report_error("create_text_engine");
         /* Continue without text engine -- text rendering will be unavailable */
     }
 
