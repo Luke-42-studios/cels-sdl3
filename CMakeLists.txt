@@ -125,4 +125,11 @@ if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
     add_executable(demo examples/demo/main.c)
     target_link_libraries(demo PRIVATE cels-sdl3)
     set_target_properties(demo PROPERTIES C_STANDARD 99 C_STANDARD_REQUIRED ON)
+
+    # Copy shared assets to build directory for demo and text examples
+    add_custom_command(TARGET demo POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_CURRENT_SOURCE_DIR}/examples/assets
+        $<TARGET_FILE_DIR:demo>/assets
+    )
 endif()

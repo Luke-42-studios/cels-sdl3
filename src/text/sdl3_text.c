@@ -21,6 +21,8 @@ static TTF_Font* g_fonts[SDL3_MAX_FONTS] = {0};
 
 bool sdl3_font_load(int font_id, const char* path, float pt_size)
 {
+    sdl3_ensure_init();
+
     if (font_id < 0 || font_id >= SDL3_MAX_FONTS) {
         sdl3_report_error("font_load_invalid_id");
         return false;

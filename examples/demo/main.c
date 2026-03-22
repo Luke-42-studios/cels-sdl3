@@ -64,7 +64,7 @@ CEL_System(FontLoader, .phase = OnLoad) {
     if (loaded) return;
     loaded = true;
 
-    if (!sdl3_font_load(0, "examples/assets/PressStart2P-Regular.ttf", 16.0f)) {
+    if (!sdl3_font_load(0, "assets/PressStart2P-Regular.ttf", 16.0f)) {
         printf("Warning: failed to load font slot 0\n");
     }
     printf("Demo fonts loaded\n");
@@ -109,7 +109,7 @@ CEL_Compose(World) {
         /* Attach sprite to the window entity for the tree */
         {
             SDL3_Sprite tree_sprite = {
-                .texture_path = "examples/assets/tree.png",
+                .texture_path = "assets/tree.png",
                 .dst_rect = { .x = 500, .y = 380, .w = 48, .h = 64 },
                 .flip = SDL_FLIP_NONE,
                 .alpha = 255
