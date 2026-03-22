@@ -80,75 +80,64 @@ CEL_System(FontLoader, .phase = OnLoad) {
  */
 
 CEL_Compose(World) {
-    cels_entity_t* win_id = cel_remember(cels_entity_t, 0);
-    bool* init_done = cel_remember(bool, false);
-
     SDL3Window(.title = "cels-sdl3 Demo", .width = 1280, .height = 720,
                .context = true, .target_fps = 60) {
-        *win_id = cels_get_current_entity();
+        /* Sprite on the window entity (texture system queries Sprite+Renderer+Window) */
+        cel_has(SDL3_Sprite,
+            .texture_path = "assets/tree.png",
+            .dst_rect = { .x = 500, .y = 380, .w = 48, .h = 64 },
+            .flip = SDL_FLIP_NONE,
+            .alpha = 255
+        );
     }
 
-    if (*win_id && !*init_done) {
-        *init_done = true;
+    /* Title text entity */
+    cel_entity() {
+        cel_has(SDL3_Text,
+            .string = "cels-sdl3 Demo",
+            .font_id = 0,
+            .color = {255, 255, 255, 255},
+            .x = 16, .y = 16
+        );
+        cel_has(SDL3_TextHandle);
+    }
 
-        /* Set sky-blue clear color on the renderer.
-         * cel_watch reads the component for this entity. */
-        {
-            const SDL3_Renderer* rend = cel_watch(*win_id, SDL3_Renderer);
-            if (rend) {
-                /* We need to modify clear_color -- use cels_entity_set_component
-                 * pattern or cel_update. Since we are in a composition, not a
-                 * system, we modify via cels_entity_get_component + set. */
-                SDL3_Renderer mutable_rend = *rend;
-                mutable_rend.clear_color = (SDL_Color){135, 206, 235, 255};
-                cels_entity_set_component(*win_id, SDL3_Renderer_id,
-                    &mutable_rend, sizeof(mutable_rend));
-            }
-        }
+    /* FPS counter text entity -- string points to double-buffered static */
+    cel_entity() {
+        cel_has(SDL3_Text,
+            .string = s_fps_bufs[0],
+            .font_id = 0,
+            .color = {255, 255, 0, 255},
+            .x = 16, .y = 40
+        );
+        cel_has(SDL3_TextHandle);
+    }
 
-        /* Attach sprite to the window entity for the tree */
-        {
-            SDL3_Sprite tree_sprite = {
-                .texture_path = "assets/tree.png",
-                .dst_rect = { .x = 500, .y = 380, .w = 48, .h = 64 },
-                .flip = SDL_FLIP_NONE,
-                .alpha = 255
-            };
-            cels_entity_set_component(*win_id, SDL3_Sprite_id,
-                &tree_sprite, sizeof(tree_sprite));
-        }
+    /* Instructions text entity */
+    cel_entity() {
+        cel_has(SDL3_Text,
+            .string = "Click to plant / ESC to quit",
+            .font_id = 0,
+            .color = {200, 200, 200, 255},
+            .x = 16, .y = 64
+        );
+        cel_has(SDL3_TextHandle);
+    }
+}
 
-        /* Title text entity */
-        cel_entity() {
-            cel_has(SDL3_Text,
-                .string = "cels-sdl3 Demo",
-                .font_id = 0,
-                .color = {255, 255, 255, 255},
-                .x = 16, .y = 16
-            );
-            cel_has(SDL3_TextHandle);
-        }
+/* ============================================================================
+ * DemoInit system -- one-shot: set sky-blue clear color on all renderers
+ * ============================================================================ */
 
-        /* FPS counter text entity -- string points to double-buffered static */
-        cel_entity() {
-            cel_has(SDL3_Text,
-                .string = s_fps_bufs[0],
-                .font_id = 0,
-                .color = {255, 255, 0, 255},
-                .x = 16, .y = 40
-            );
-            cel_has(SDL3_TextHandle);
-        }
+CEL_System(DemoInit, .phase = OnLoad) {
+    static bool done = false;
+    if (done) return;
+    done = true;
 
-        /* Instructions text entity */
-        cel_entity() {
-            cel_has(SDL3_Text,
-                .string = "Click to plant / ESC to quit",
-                .font_id = 0,
-                .color = {200, 200, 200, 255},
-                .x = 16, .y = 64
-            );
-            cel_has(SDL3_TextHandle);
+    cel_query(SDL3_Renderer);
+    cel_each(SDL3_Renderer) {
+        cel_update(SDL3_Renderer) {
+            SDL3_Renderer->clear_color = (SDL_Color){135, 206, 235, 255};
         }
     }
 }
@@ -307,6 +296,7 @@ cels_main() {
     cels_register(SDL3_Engine);
     SDL3_Renderable_use();
     cels_register(FontLoader);
+    cels_register(DemoInit);
     cels_register(DemoInput);
     cels_register(DemoRenderer);
     cels_register(FPSUpdater);
