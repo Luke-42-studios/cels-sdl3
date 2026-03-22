@@ -17,6 +17,18 @@ CEL_State(SDL3_ContextState);
 CEL_State(SDL3_FrameState);
 
 /* ============================================================================
+ * Registration Guards -- prevent double-registration
+ * ============================================================================ */
+
+static bool s_init_registered      = false;
+static bool s_frameloop_registered = false;
+static bool s_input_registered     = false;
+static bool s_textures_registered  = false;
+static bool s_window_registered    = false;
+static bool s_text_registered      = false;
+static bool s_renderer_registered  = false;
+
+/* ============================================================================
  * Context Lifecycle
  * ============================================================================ */
 
@@ -492,61 +504,128 @@ CEL_System(SDL3_RenderPresentSystem, .phase = PostRender) {
 }
 
 /* ============================================================================
- * Module Init
+ * A La Carte Registration
  * ============================================================================
  *
- * Registration order determines system execution within the same phase:
- *   1.  InputSystem (drains events, routes to windows, fills queues)
- *   1b. TextureLoadSystem (loads textures for sprites with NONE state)
- *   2.  WindowState (CLOSING -> CLOSED transitions, text/texture/renderer cleanup)
- *   3.  FrameState (checks if all windows closed)
- *   4.  RenderClear (PreRender phase -- clears each window, resets draw buffers)
- *   4b. SpriteRenderSystem (OnRender phase -- renders READY sprites)
- *   4c. TextRenderSystem (OnRender phase -- renders text entities)
- *   5.  DrawFlush (PostRender phase -- sorts and flushes draw commands)
- *   6.  RenderPresent (PostRender phase -- presents each window)
+ * Each _use() function registers its own CELS declarations (components,
+ * states, systems, lifecycles). Guard flags prevent double-registration.
+ *
+ * No auto-dependency pulling: SDL3_Window_use() does NOT register Init.
+ * The developer is responsible for calling the _use() functions they need,
+ * or using SDL3_use() for all-in-one registration.
+ *
+ * System execution order (determined by registration order within each phase):
+ *   OnLoad:     InputSystem -> TextureLoadSystem -> WindowStateSystem -> FrameStateSystem
+ *   PreRender:  RenderClearSystem
+ *   OnRender:   SpriteRenderSystem -> TextRenderSystem
+ *   PostRender: DrawFlushSystem -> RenderPresentSystem
  */
 
-CEL_Module(SDL3_Engine, init) {
-    cels_register(SDL3_ContextState, SDL3_ContextLC,
-                  SDL3_ContextConfig);
-    cels_register(SDL3_FrameState, SDL3_InputSystem);
+void SDL3_Init_use(void) {
+    if (s_init_registered) return;
+    s_init_registered = true;
+    cels_register(SDL3_ContextState, SDL3_ContextLC, SDL3_ContextConfig);
+}
+
+void SDL3_FrameLoop_use(void) {
+    if (s_frameloop_registered) return;
+    s_frameloop_registered = true;
+    cels_register(SDL3_FrameState);
+}
+
+void SDL3_Input_use(void) {
+    if (s_input_registered) return;
+    s_input_registered = true;
+    cels_register(SDL3_InputSystem);
+}
+
+void SDL3_Textures_use(void) {
+    if (s_textures_registered) return;
+    s_textures_registered = true;
     cels_register(SDL3_TextureLoadSystem);
-    cels_register(SDL3_WindowConfig, SDL3_WindowComponent, SDL3_EventQueue,
-                  SDL3_Renderer, SDL3_Sprite,
-                  SDL3_WindowLC, SDL3_WindowStateSystem);
-    cels_register(SDL3_Text, SDL3_TextHandle);
-    cels_register(SDL3_FrameStateSystem);
-    cels_register(SDL3_RenderClearSystem);
-    cels_register(SDL3_SpriteRenderSystem);
-    cels_register(SDL3_TextRenderSystem);
-    cels_register(SDL3_DrawFlushSystem);
-    cels_register(SDL3_RenderPresentSystem);
+    cels_register(SDL3_Sprite, SDL3_SpriteRenderSystem);
 
-    /* Eagerly initialize SDL3_EventQueue_id so the window creation observer
-     * (CEL_Observe(SDL3_WindowLC, on_create)) can attach an empty queue to
-     * each new window entity. CEL_Component _register() is a no-op -- the
-     * actual ID is only assigned by cels_ensure_component when cel_has or
-     * cel_query first references the type. The observer fires before any
-     * system body runs, so we force initialization here. */
-    cels_ensure_component(&SDL3_EventQueue_id, "SDL3_EventQueue",
-                          sizeof(SDL3_EventQueue), CELS_ALIGNOF(SDL3_EventQueue));
-
-    /* Same pattern for SDL3_Renderer_id -- the on_create observer uses it
-     * to attach a renderer component before any system body runs. */
-    cels_ensure_component(&SDL3_Renderer_id, "SDL3_Renderer",
-                          sizeof(SDL3_Renderer), CELS_ALIGNOF(SDL3_Renderer));
-
-    /* Same pattern for SDL3_Sprite_id -- systems that query SDL3_Sprite
-     * need the component ID initialized before any system body runs. */
     cels_ensure_component(&SDL3_Sprite_id, "SDL3_Sprite",
                           sizeof(SDL3_Sprite), CELS_ALIGNOF(SDL3_Sprite));
+}
 
-    /* Text components -- systems query SDL3_Text and SDL3_TextHandle */
+void SDL3_Window_use(void) {
+    if (s_window_registered) return;
+    s_window_registered = true;
+    cels_register(SDL3_WindowConfig, SDL3_WindowComponent, SDL3_EventQueue,
+                  SDL3_Renderer, SDL3_WindowLC, SDL3_WindowStateSystem);
+    /* FrameStateSystem monitors window states (checks if all windows closed).
+     * It must register AFTER WindowStateSystem so that within OnLoad phase,
+     * WindowStateSystem runs before FrameStateSystem. */
+    cels_register(SDL3_FrameStateSystem);
+
+    /* Eagerly initialize component IDs so the window creation observer
+     * (CEL_Observe(SDL3_WindowLC, on_create)) can attach components
+     * before any system body runs. */
+    cels_ensure_component(&SDL3_EventQueue_id, "SDL3_EventQueue",
+                          sizeof(SDL3_EventQueue), CELS_ALIGNOF(SDL3_EventQueue));
+    cels_ensure_component(&SDL3_Renderer_id, "SDL3_Renderer",
+                          sizeof(SDL3_Renderer), CELS_ALIGNOF(SDL3_Renderer));
+}
+
+void SDL3_Text_use(void) {
+    if (s_text_registered) return;
+    s_text_registered = true;
+    cels_register(SDL3_Text, SDL3_TextHandle, SDL3_TextRenderSystem);
+
     cels_ensure_component(&SDL3_Text_id, "SDL3_Text",
                           sizeof(SDL3_Text), CELS_ALIGNOF(SDL3_Text));
     cels_ensure_component(&SDL3_TextHandle_id, "SDL3_TextHandle",
                           sizeof(SDL3_TextHandle), CELS_ALIGNOF(SDL3_TextHandle));
+}
+
+void SDL3_Renderer_use(void) {
+    if (s_renderer_registered) return;
+    s_renderer_registered = true;
+    cels_register(SDL3_RenderClearSystem);
+    cels_register(SDL3_DrawFlushSystem);
+    cels_register(SDL3_RenderPresentSystem);
+}
+
+void SDL3_use(const SDL3_Config* config) {
+    /* Apply config before registration */
+    if (config) {
+        if (config->on_error) {
+            sdl3_set_error_callback(config->on_error);
+        }
+        if (config->sdl_init_flags) {
+            sdl3_set_init_flags(config->sdl_init_flags);
+        }
+    }
+
+    /* Register all providers in correct order.
+     * Call order determines system execution within the same CELS phase. */
+    SDL3_Init_use();
+    SDL3_FrameLoop_use();
+    SDL3_Input_use();
+    SDL3_Textures_use();
+    SDL3_Window_use();
+    SDL3_Text_use();
+    SDL3_Renderer_use();
+}
+
+/* ============================================================================
+ * Module Init -- backward compatibility shim
+ * ============================================================================
+ *
+ * cels_register(SDL3_Engine) delegates to SDL3_use(NULL) which registers
+ * all providers with default configuration. For custom configuration,
+ * call SDL3_use(&config) directly instead of cels_register(SDL3_Engine).
+ *
+ * System execution order (determined by registration order within each phase):
+ *   OnLoad:     InputSystem -> TextureLoadSystem -> WindowStateSystem -> FrameStateSystem
+ *   PreRender:  RenderClearSystem
+ *   OnRender:   SpriteRenderSystem -> TextRenderSystem
+ *   PostRender: DrawFlushSystem -> RenderPresentSystem
+ */
+
+CEL_Module(SDL3_Engine, init) {
+    SDL3_use(NULL);
 }
 
 /* ============================================================================

@@ -57,6 +57,22 @@ typedef struct SDL3_Config {
 /* Error reporting */
 extern void sdl3_set_error_callback(SDL3_ErrorCallback callback);
 
+/* All-in-one registration -- registers all providers with optional config */
+extern void SDL3_use(const SDL3_Config* config);
+
+/* A la carte registration -- call only what you need.
+ * No auto-dependency pulling: SDL3_Window_use() does NOT register Init.
+ * Call order matters for system execution within the same CELS phase.
+ * Recommended order: Init -> FrameLoop -> Input -> Textures -> Window -> Text -> Renderer
+ * All registration must happen before the first cels_step(). */
+extern void SDL3_Init_use(void);
+extern void SDL3_FrameLoop_use(void);
+extern void SDL3_Input_use(void);
+extern void SDL3_Textures_use(void);
+extern void SDL3_Window_use(void);
+extern void SDL3_Text_use(void);
+extern void SDL3_Renderer_use(void);
+
 /* ============================================================================
  * Component Types
  * ============================================================================ */
