@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-03-15)
 
 **Core value:** Developers can build 2D graphical applications using the CELS framework with SDL3 as the backend, using the same declarative ECS patterns they know from cels-ncurses
-**Current focus:** Phase 9 complete -- Module Integration. Both plans done (error reporting + registration API). Phase 10 next (Example Showcase).
+**Current focus:** PROJECT COMPLETE -- All 10 phases done. Full v1 feature set delivered with demo application.
 
 ## Current Position
 
-Phase: 9 of 10 (Module Integration)
-Plan: 2 of 2 in current phase
-Status: Phase complete
-Last activity: 2026-03-22 -- Completed 09-02-PLAN.md (registration API)
+Phase: 10 of 10 (Example Application)
+Plan: 1 of 1 in current phase
+Status: Project complete
+Last activity: 2026-03-22 -- Completed 10-01-PLAN.md (demo application)
 
-Progress: [██████████████████░░] 90% (18/20 plans complete)
+Progress: [████████████████████] 100% (20/20 plans complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 18
-- Average duration: 6.7 min
-- Total execution time: 2.0 hours
+- Total plans completed: 20
+- Average duration: 6.3 min
+- Total execution time: 2.1 hours
 
 **By Phase:**
 
@@ -36,10 +36,11 @@ Progress: [██████████████████░░] 90% (18
 | 07-textures | 2/2 | 6 min | 3 min |
 | 08-text-rendering | 2/2 | 9 min | 4.5 min |
 | 09-module-integration | 2/2 | 7 min | 3.5 min |
+| 10-example-application | 1/1 | 4 min | 4 min |
 
 **Recent Trend:**
-- Last 5 plans: 07-02 (2 min), 08-01 (6 min), 08-02 (3 min), 09-01 (3 min), 09-02 (4 min)
-- Trend: Consistent 2-6 min per plan with established patterns
+- Last 5 plans: 08-02 (3 min), 09-01 (3 min), 09-02 (4 min), 10-01 (4 min)
+- Trend: Consistent 3-4 min per plan in final phases
 
 *Updated after each plan completion*
 
@@ -100,6 +101,10 @@ Recent decisions affecting current work:
 - [09-02]: 7 individual _use() functions: Init, FrameLoop, Input, Textures, Window, Text, Renderer
 - [09-02]: FrameStateSystem placed in Window_use() (monitors window states), not FrameLoop_use()
 - [09-02]: SDL3_use() call order: Init -> FrameLoop -> Input -> Textures -> Window -> Text -> Renderer
+- [10-01]: Sprite attached to window entity via cels_entity_set_component (TextureLoadSystem query pattern)
+- [10-01]: FPS string uses double-buffered static arrays for pointer-change detection in text cache invalidation
+- [10-01]: Font loaded in OnLoad system with static guard (matching text example pattern)
+- [10-01]: Tree sprite created via ImageMagick (32x48 pixel art, CC0)
 
 ### Pending Todos
 
@@ -114,6 +119,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-22 00:11 UTC
-Stopped at: Completed 09-02-PLAN.md (registration API) -- Phase 9 complete (2/2 plans done)
+Last session: 2026-03-22 00:20 UTC
+Stopped at: Completed 10-01-PLAN.md (demo application) -- Phase 10 complete. Project complete (20/20 plans).
 Resume file: None
