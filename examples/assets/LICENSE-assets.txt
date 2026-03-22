@@ -1,0 +1,14 @@
+Asset Licenses for cels-sdl3 Examples
+======================================
+
+PressStart2P-Regular.ttf
+  Font: Press Start 2P
+  Author: codeman38 (cody@zone38.net)
+  License: SIL Open Font License, Version 1.1
+  Source: https://fonts.google.com/specimen/Press+Start+2P
+
+tree.png
+  Description: 32x48 pixel-art tree sprite
+  Author: Created for cels-sdl3 project (generated via ImageMagick)
+  License: CC0 1.0 Universal (Public Domain)
+  Source: Created for cels-sdl3 project
