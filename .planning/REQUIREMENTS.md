@@ -43,10 +43,10 @@
 
 ### Integration
 
-- [ ] **INTG-01**: SDL3_Engine_use() bundles all providers via CEL_DefineModule(SDL3_Engine)
-- [ ] **INTG-02**: Individual providers available a la carte (SDL3_Window_use, SDL3_Input_use, etc.)
-- [ ] **INTG-03**: All SDL resources destroyed in correct order on shutdown (textures/fonts before renderer before window)
-- [ ] **INTG-04**: SDL_GetError() surfaced on failures through error reporting mechanism
+- [x] **INTG-01**: SDL3_Engine_use() bundles all providers via CEL_DefineModule(SDL3_Engine)
+- [x] **INTG-02**: Individual providers available a la carte (SDL3_Window_use, SDL3_Input_use, etc.)
+- [x] **INTG-03**: All SDL resources destroyed in correct order on shutdown (textures/fonts before renderer before window)
+- [x] **INTG-04**: SDL_GetError() surfaced on failures through error reporting mechanism
 - [ ] **INTG-05**: Example app demonstrates all v1 features — colored window, input handling, draw primitives, texture, text
 
 ## v2 Requirements
@@ -110,10 +110,10 @@
 | TEXT-01 | Phase 8: Text Rendering | Complete |
 | TEXT-02 | Phase 8: Text Rendering | Complete |
 | TEXT-03 | Phase 8: Text Rendering | Complete |
-| INTG-01 | Phase 9: Module Integration | Pending |
-| INTG-02 | Phase 9: Module Integration | Pending |
-| INTG-03 | Phase 9: Module Integration | Pending |
-| INTG-04 | Phase 9: Module Integration | Pending |
+| INTG-01 | Phase 9: Module Integration | Complete |
+| INTG-02 | Phase 9: Module Integration | Complete |
+| INTG-03 | Phase 9: Module Integration | Complete |
+| INTG-04 | Phase 9: Module Integration | Complete |
 | INTG-05 | Phase 10: Example Application | Pending |
 
 **Coverage:**
