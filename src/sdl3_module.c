@@ -233,44 +233,54 @@ CEL_System(SDL3_SpriteRenderSystem, .phase = OnRender) {
 }
 
 /* ============================================================================
+ * Text Renderer Lookup System -- finds active renderer for text rendering
+ * ============================================================================
+ *
+ * Runs at OnRender phase BEFORE TextRenderSystem (registration order).
+ * Finds the first READY window's renderer and text engine, stores them
+ * in file-scoped statics for TextRenderSystem to consume.
+ *
+ * Split from TextRenderSystem to obey the one-cel_query-per-system rule.
+ */
+
+static SDL_Renderer*  s_text_active_renderer = NULL;
+static TTF_TextEngine* s_text_active_engine  = NULL;
+
+CEL_System(SDL3_TextRendererLookupSystem, .phase = OnRender) {
+    s_text_active_renderer = NULL;
+    s_text_active_engine   = NULL;
+
+    cel_query(SDL3_WindowComponent, SDL3_Renderer);
+    cel_each(SDL3_WindowComponent, SDL3_Renderer) {
+        if (SDL3_WindowComponent->state == SDL3_WINDOW_READY ||
+            SDL3_WindowComponent->state == SDL3_WINDOW_RESIZING) {
+            if (SDL3_Renderer->renderer && SDL3_Renderer->text_engine) {
+                s_text_active_renderer = SDL3_Renderer->renderer;
+                s_text_active_engine   = SDL3_Renderer->text_engine;
+                break;  /* Use first active renderer */
+            }
+        }
+    }
+}
+
+/* ============================================================================
  * Text Render System -- renders text entities each frame
  * ============================================================================
  *
- * Runs at OnRender phase. Text entities have SDL3_Text + SDL3_TextHandle
- * (separate from window entities). The system finds the first active
- * renderer/text-engine, then iterates text entities to create, sync,
- * and draw TTF_Text objects.
+ * Runs at OnRender phase AFTER TextRendererLookupSystem (registration order).
+ * Uses s_text_active_renderer / s_text_active_engine set by the lookup system.
  *
  * Single-window text assignment: all text draws to the first READY window.
  */
 
 CEL_System(SDL3_TextRenderSystem, .phase = OnRender) {
-    /* Step 1: Find the first active renderer + text engine */
-    SDL_Renderer* active_renderer = NULL;
-    TTF_TextEngine* active_engine = NULL;
+    if (!s_text_active_renderer || !s_text_active_engine) return;
 
-    {
-        cel_query(SDL3_WindowComponent, SDL3_Renderer);
-        cel_each(SDL3_WindowComponent, SDL3_Renderer) {
-            if (SDL3_WindowComponent->state == SDL3_WINDOW_READY ||
-                SDL3_WindowComponent->state == SDL3_WINDOW_RESIZING) {
-                if (SDL3_Renderer->renderer && SDL3_Renderer->text_engine) {
-                    active_renderer = SDL3_Renderer->renderer;
-                    active_engine = SDL3_Renderer->text_engine;
-                    break;  /* Use first active renderer */
-                }
-            }
-        }
-    }
-
-    if (!active_renderer || !active_engine) return;
-
-    /* Step 2: Render all text entities */
     cel_query(SDL3_Text, SDL3_TextHandle);
     cel_each(SDL3_Text, SDL3_TextHandle) {
         /* Create TTF_Text on first encounter */
         if (!SDL3_TextHandle->ttf_text && SDL3_Text->string) {
-            TTF_Text* created = sdl3_text_create(active_engine,
+            TTF_Text* created = sdl3_text_create(s_text_active_engine,
                 SDL3_Text->font_id, SDL3_Text->string);
             if (created) {
                 TTF_SetTextColor(created, SDL3_Text->color.r,
@@ -322,37 +332,62 @@ CEL_System(SDL3_TextRenderSystem, .phase = OnRender) {
 }
 
 /* ============================================================================
+ * Text Cleanup Check System -- detects CLOSING windows for text cleanup
+ * ============================================================================
+ *
+ * Runs at OnLoad phase BEFORE TextCleanupSystem (registration order).
+ * Sets s_any_window_closing so TextCleanupSystem knows whether to
+ * destroy TTF_Text handles. Split from WindowStateSystem to obey
+ * the one-cel_query-per-system rule.
+ */
+
+static bool s_any_window_closing = false;
+
+CEL_System(SDL3_TextCleanupCheckSystem, .phase = OnLoad) {
+    s_any_window_closing = false;
+
+    cel_query(SDL3_WindowComponent);
+    cel_each(SDL3_WindowComponent) {
+        if (SDL3_WindowComponent->state == SDL3_WINDOW_CLOSING) {
+            s_any_window_closing = true;
+        }
+    }
+}
+
+/* ============================================================================
+ * Text Cleanup System -- destroys TTF_Text handles when windows close
+ * ============================================================================
+ *
+ * Runs at OnLoad phase AFTER TextCleanupCheckSystem, BEFORE WindowStateSystem.
+ * TTF_Text objects MUST be destroyed before the text engine and renderer.
+ * Destruction order: TTF_Text -> TTF_TextEngine -> SDL_Renderer -> SDL_Window
+ */
+
+CEL_System(SDL3_TextCleanupSystem, .phase = OnLoad) {
+    if (!s_any_window_closing) return;
+
+    cel_query(SDL3_TextHandle);
+    cel_each(SDL3_TextHandle) {
+        if (SDL3_TextHandle->ttf_text) {
+            sdl3_text_destroy(SDL3_TextHandle->ttf_text);
+            cel_update(SDL3_TextHandle) {
+                SDL3_TextHandle->ttf_text = NULL;
+            }
+        }
+    }
+}
+
+/* ============================================================================
  * Window State System -- per-frame state machine driver
- * ============================================================================ */
+ * ============================================================================
+ *
+ * Runs at OnLoad phase AFTER TextCleanupCheckSystem and TextCleanupSystem.
+ * Handles CLOSING -> CLOSED transitions: destroys text engine, renderer,
+ * and window in correct order. Text handles are already cleaned up by
+ * TextCleanupSystem above.
+ */
 
 CEL_System(SDL3_WindowStateSystem, .phase = OnLoad) {
-    /* First pass: check if any window is CLOSING and destroy text handles.
-     * TTF_Text objects MUST be destroyed before the text engine and renderer.
-     * Destruction order: TTF_Text -> TTF_TextEngine -> SDL_Renderer -> SDL_Window */
-    bool any_closing = false;
-    {
-        cel_query(SDL3_WindowComponent);
-        cel_each(SDL3_WindowComponent) {
-            if (SDL3_WindowComponent->state == SDL3_WINDOW_CLOSING) {
-                any_closing = true;
-            }
-        }
-    }
-
-    if (any_closing) {
-        cel_query(SDL3_TextHandle);
-        cel_each(SDL3_TextHandle) {
-            if (SDL3_TextHandle->ttf_text) {
-                sdl3_text_destroy(SDL3_TextHandle->ttf_text);
-                cel_update(SDL3_TextHandle) {
-                    SDL3_TextHandle->ttf_text = NULL;
-                }
-            }
-        }
-    }
-
-    /* Second pass: window state transitions */
-    {
     cel_query(SDL3_WindowComponent, SDL3_Renderer);
     cel_each(SDL3_WindowComponent, SDL3_Renderer) {
         if (SDL3_WindowComponent->state == SDL3_WINDOW_CLOSING) {
@@ -360,7 +395,7 @@ CEL_System(SDL3_WindowStateSystem, .phase = OnLoad) {
              * Destroy text engine BEFORE renderer, renderer BEFORE window. */
             bool owns_context = SDL3_WindowComponent->context_bound;
 
-            /* Destroy text engine after text handles (first pass above) */
+            /* Destroy text engine after text handles (TextCleanupSystem above) */
             if (SDL3_Renderer->text_engine) {
                 TTF_DestroyRendererTextEngine(SDL3_Renderer->text_engine);
                 cel_update(SDL3_Renderer) {
@@ -397,7 +432,6 @@ CEL_System(SDL3_WindowStateSystem, .phase = OnLoad) {
             }
         }
     }
-    } /* end second-pass block scope */
 }
 
 /* ============================================================================
@@ -515,9 +549,10 @@ CEL_System(SDL3_RenderPresentSystem, .phase = PostRender) {
  * or using SDL3_use() for all-in-one registration.
  *
  * System execution order (determined by registration order within each phase):
- *   OnLoad:     InputSystem -> TextureLoadSystem -> WindowStateSystem -> FrameStateSystem
+ *   OnLoad:     InputSystem -> TextureLoadSystem -> TextCleanupCheckSystem
+ *               -> TextCleanupSystem -> WindowStateSystem -> FrameStateSystem
  *   PreRender:  RenderClearSystem
- *   OnRender:   SpriteRenderSystem -> TextRenderSystem
+ *   OnRender:   SpriteRenderSystem -> TextRendererLookupSystem -> TextRenderSystem
  *   PostRender: DrawFlushSystem -> RenderPresentSystem
  */
 
@@ -552,8 +587,14 @@ void SDL3_Textures_use(void) {
 void SDL3_Window_use(void) {
     if (s_window_registered) return;
     s_window_registered = true;
+    /* TextCleanupCheckSystem and TextCleanupSystem must run BEFORE
+     * WindowStateSystem within OnLoad phase (registration order = execution
+     * order). They detect CLOSING windows and destroy TTF_Text handles before
+     * WindowStateSystem destroys the text engine and renderer. */
     cels_register(SDL3_WindowConfig, SDL3_WindowComponent, SDL3_EventQueue,
-                  SDL3_Renderer, SDL3_WindowLC, SDL3_WindowStateSystem);
+                  SDL3_Renderer, SDL3_WindowLC,
+                  SDL3_TextCleanupCheckSystem, SDL3_TextCleanupSystem,
+                  SDL3_WindowStateSystem);
     /* FrameStateSystem monitors window states (checks if all windows closed).
      * It must register AFTER WindowStateSystem so that within OnLoad phase,
      * WindowStateSystem runs before FrameStateSystem. */
@@ -571,7 +612,11 @@ void SDL3_Window_use(void) {
 void SDL3_Text_use(void) {
     if (s_text_registered) return;
     s_text_registered = true;
-    cels_register(SDL3_Text, SDL3_TextHandle, SDL3_TextRenderSystem);
+    /* TextRendererLookupSystem must register BEFORE TextRenderSystem so it
+     * runs first within OnRender phase, populating s_text_active_renderer
+     * and s_text_active_engine for TextRenderSystem to consume. */
+    cels_register(SDL3_Text, SDL3_TextHandle,
+                  SDL3_TextRendererLookupSystem, SDL3_TextRenderSystem);
 
     cels_ensure_component(&SDL3_Text_id, "SDL3_Text",
                           sizeof(SDL3_Text), CELS_ALIGNOF(SDL3_Text));
@@ -618,9 +663,10 @@ void SDL3_use(const SDL3_Config* config) {
  * call SDL3_use(&config) directly instead of cels_register(SDL3_Engine).
  *
  * System execution order (determined by registration order within each phase):
- *   OnLoad:     InputSystem -> TextureLoadSystem -> WindowStateSystem -> FrameStateSystem
+ *   OnLoad:     InputSystem -> TextureLoadSystem -> TextCleanupCheckSystem
+ *               -> TextCleanupSystem -> WindowStateSystem -> FrameStateSystem
  *   PreRender:  RenderClearSystem
- *   OnRender:   SpriteRenderSystem -> TextRenderSystem
+ *   OnRender:   SpriteRenderSystem -> TextRendererLookupSystem -> TextRenderSystem
  *   PostRender: DrawFlushSystem -> RenderPresentSystem
  */
 
