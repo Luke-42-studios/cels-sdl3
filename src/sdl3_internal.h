@@ -13,6 +13,12 @@ extern void sdl3_init(const SDL3_ContextConfig* config);
 extern void sdl3_ensure_init(void);
 extern void sdl3_shutdown(void);
 
+/* Error reporting -- all SDL failure sites call this */
+extern void sdl3_report_error(const char* context);
+
+/* Init configuration -- called by SDL3_use() before registration */
+extern void sdl3_set_init_flags(Uint32 flags);
+
 /* Window lifecycle -- called from sdl3_module.c observers */
 extern void sdl3_window_create(cels_entity_t entity,
                                 const SDL3_WindowConfig* config,

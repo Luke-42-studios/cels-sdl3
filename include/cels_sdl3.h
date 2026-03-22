@@ -26,6 +26,38 @@
 CEL_Module(SDL3_Engine);
 
 /* ============================================================================
+ * Error Reporting
+ * ============================================================================ */
+
+/*
+ * Error callback function type. Receives a context string identifying
+ * the operation that failed (e.g., "create_window", "create_renderer")
+ * and the SDL error message. Informational only -- the module decides
+ * recovery internally. The callback must not call SDL functions.
+ */
+typedef void (*SDL3_ErrorCallback)(const char* context, const char* message);
+
+/* ============================================================================
+ * Configuration
+ * ============================================================================ */
+
+/*
+ * Module configuration. Pass to SDL3_use() for custom settings.
+ * Pass NULL for all defaults.
+ *
+ *   SDL3_use(&(SDL3_Config){
+ *       .on_error = my_handler
+ *   });
+ */
+typedef struct SDL3_Config {
+    SDL3_ErrorCallback  on_error;       /* NULL = default SDL_Log handler */
+    Uint32              sdl_init_flags; /* 0 = SDL_INIT_VIDEO (default) */
+} SDL3_Config;
+
+/* Error reporting */
+extern void sdl3_set_error_callback(SDL3_ErrorCallback callback);
+
+/* ============================================================================
  * Component Types
  * ============================================================================ */
 
