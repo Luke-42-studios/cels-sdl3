@@ -257,7 +257,9 @@ CEL_System(SDL3_TextRendererLookupSystem, .phase = OnRender) {
             if (SDL3_Renderer->renderer && SDL3_Renderer->text_engine) {
                 s_text_active_renderer = SDL3_Renderer->renderer;
                 s_text_active_engine   = SDL3_Renderer->text_engine;
-                break;  /* Use first active renderer */
+                /* Note: no break -- cel_each uses nested for-loops where
+                 * break only exits the innermost loop, causing an infinite loop.
+                 * Instead, we just let the loop finish (single-window is typical). */
             }
         }
     }
