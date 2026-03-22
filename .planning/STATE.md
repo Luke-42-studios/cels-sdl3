@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-03-15)
 
 **Core value:** Developers can build 2D graphical applications using the CELS framework with SDL3 as the backend, using the same declarative ECS patterns they know from cels-ncurses
-**Current focus:** Phase 8 complete -- Text Rendering. Both plans done. Ready for Phase 9 (Clay Integration).
+**Current focus:** Phase 9 in progress -- Module Integration. Plan 01 complete (error reporting). Plan 02 next (registration API).
 
 ## Current Position
 
-Phase: 8 of 10 (Text Rendering)
-Plan: 2 of 2 in current phase
-Status: Phase complete
-Last activity: 2026-03-21 -- Completed 08-02-PLAN.md (text rendering example)
+Phase: 9 of 10 (Module Integration)
+Plan: 1 of 2 in current phase
+Status: In progress
+Last activity: 2026-03-22 -- Completed 09-01-PLAN.md (error reporting infrastructure)
 
-Progress: [████████████████░░░░] 80% (16/20 plans complete)
+Progress: [█████████████████░░░] 85% (17/20 plans complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 16
-- Average duration: 7.1 min
-- Total execution time: 1.85 hours
+- Total plans completed: 17
+- Average duration: 6.9 min
+- Total execution time: 1.9 hours
 
 **By Phase:**
 
@@ -35,9 +35,10 @@ Progress: [████████████████░░░░] 80% (16
 | 06-draw-primitives | 2/2 | 6 min | 3 min |
 | 07-textures | 2/2 | 6 min | 3 min |
 | 08-text-rendering | 2/2 | 9 min | 4.5 min |
+| 09-module-integration | 1/2 | 3 min | 3 min |
 
 **Recent Trend:**
-- Last 5 plans: 06-02 (2 min), 07-01 (4 min), 07-02 (2 min), 08-01 (6 min), 08-02 (3 min)
+- Last 5 plans: 07-01 (4 min), 07-02 (2 min), 08-01 (6 min), 08-02 (3 min), 09-01 (3 min)
 - Trend: Consistent 2-6 min per plan with established patterns
 
 *Updated after each plan completion*
@@ -92,6 +93,9 @@ Recent decisions affecting current work:
 - [08-02]: Text entities created via cel_entity() in CEL_Compose alongside SDL3Window -- same TU avoids per-TU ID issues
 - [08-02]: TextInteraction uses dual block-scoped cel_query: first reads events, second modifies text
 - [08-02]: Dynamic text identified by y-position range rather than entity ID tracking
+- [09-01]: All SDL_Log error calls migrated to sdl3_report_error with callback routing and SDL_Log fallback
+- [09-01]: sdl3_report_error context strings are descriptive (e.g., "create_window", "font_load_invalid_id")
+- [09-01]: Init flag precedence: s_init_flags (from SDL3_Config) > config->video (from ECS ContextConfig) > no-op
 
 ### Pending Todos
 
@@ -106,6 +110,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-21 23:57 UTC
-Stopped at: Completed 08-02-PLAN.md (text rendering example) -- Phase 8 complete
+Last session: 2026-03-22 00:04 UTC
+Stopped at: Completed 09-01-PLAN.md (error reporting infrastructure) -- Phase 9 plan 1 of 2 done
 Resume file: None
