@@ -19,7 +19,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 5: Renderer Core** - SDL_Renderer per window with clear/present cycle
 - [x] **Phase 6: Draw Primitives** - Feature/Provider model with filled rects, outlined rects, and lines
 - [x] **Phase 7: Textures** - SDL3_image loading and rendering with renderer affinity
-- [ ] **Phase 8: Text Rendering** - SDL3_ttf font loading, text rendering, and caching
+- [x] **Phase 8: Text Rendering** - SDL3_ttf font loading, text rendering, and caching
 - [ ] **Phase 9: Module Integration** - Engine module bundling, a la carte registration, cleanup ordering, error reporting
 - [ ] **Phase 10: Example Application** - Demo app exercising all v1 features end-to-end
 
@@ -143,8 +143,8 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 08-01-PLAN.md -- Font API, text components, text engine per-window, text render system, cleanup ordering
-- [ ] 08-02-PLAN.md -- Text rendering example app with interactive font/color/content changes
+- [x] 08-01-PLAN.md -- Font API, text components, text engine per-window, text render system, cleanup ordering
+- [x] 08-02-PLAN.md -- Text rendering example app with interactive font/color/content changes
 
 ### Phase 9: Module Integration
 **Goal**: All providers are bundled into a single engine module with correct registration, ordered cleanup, and error reporting
@@ -191,6 +191,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 5. Renderer Core | 2/2 | Complete | 2026-03-21 |
 | 6. Draw Primitives | 2/2 | Complete | 2026-03-21 |
 | 7. Textures | 2/2 | Complete | 2026-03-21 |
-| 8. Text Rendering | 0/2 | Not started | - |
+| 8. Text Rendering | 2/2 | Complete | 2026-03-21 |
 | 9. Module Integration | 0/2 | Not started | - |
 | 10. Example Application | 0/2 | Not started | - |

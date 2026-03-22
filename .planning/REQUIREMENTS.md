@@ -37,9 +37,9 @@
 
 ### Text
 
-- [ ] **TEXT-01**: Developer can load TTF font from file path at specified point size via SDL3_ttf
-- [ ] **TEXT-02**: Developer can render text string at position with color and size
-- [ ] **TEXT-03**: Rendered text is cached — unchanged text does not re-render every frame
+- [x] **TEXT-01**: Developer can load TTF font from file path at specified point size via SDL3_ttf
+- [x] **TEXT-02**: Developer can render text string at position with color and size
+- [x] **TEXT-03**: Rendered text is cached — unchanged text does not re-render every frame
 
 ### Integration
 
@@ -107,9 +107,9 @@
 | TXTR-01 | Phase 7: Textures | Complete |
 | TXTR-02 | Phase 7: Textures | Complete |
 | TXTR-03 | Phase 7: Textures | Complete |
-| TEXT-01 | Phase 8: Text Rendering | Pending |
-| TEXT-02 | Phase 8: Text Rendering | Pending |
-| TEXT-03 | Phase 8: Text Rendering | Pending |
+| TEXT-01 | Phase 8: Text Rendering | Complete |
+| TEXT-02 | Phase 8: Text Rendering | Complete |
+| TEXT-03 | Phase 8: Text Rendering | Complete |
 | INTG-01 | Phase 9: Module Integration | Pending |
 | INTG-02 | Phase 9: Module Integration | Pending |
 | INTG-03 | Phase 9: Module Integration | Pending |
