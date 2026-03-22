@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-03-15)
 
 **Core value:** Developers can build 2D graphical applications using the CELS framework with SDL3 as the backend, using the same declarative ECS patterns they know from cels-ncurses
-**Current focus:** Phase 9 in progress -- Module Integration. Plan 01 complete (error reporting). Plan 02 next (registration API).
+**Current focus:** Phase 9 complete -- Module Integration. Both plans done (error reporting + registration API). Phase 10 next (Example Showcase).
 
 ## Current Position
 
 Phase: 9 of 10 (Module Integration)
-Plan: 1 of 2 in current phase
-Status: In progress
-Last activity: 2026-03-22 -- Completed 09-01-PLAN.md (error reporting infrastructure)
+Plan: 2 of 2 in current phase
+Status: Phase complete
+Last activity: 2026-03-22 -- Completed 09-02-PLAN.md (registration API)
 
-Progress: [█████████████████░░░] 85% (17/20 plans complete)
+Progress: [██████████████████░░] 90% (18/20 plans complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 17
-- Average duration: 6.9 min
-- Total execution time: 1.9 hours
+- Total plans completed: 18
+- Average duration: 6.7 min
+- Total execution time: 2.0 hours
 
 **By Phase:**
 
@@ -35,10 +35,10 @@ Progress: [█████████████████░░░] 85% (17
 | 06-draw-primitives | 2/2 | 6 min | 3 min |
 | 07-textures | 2/2 | 6 min | 3 min |
 | 08-text-rendering | 2/2 | 9 min | 4.5 min |
-| 09-module-integration | 1/2 | 3 min | 3 min |
+| 09-module-integration | 2/2 | 7 min | 3.5 min |
 
 **Recent Trend:**
-- Last 5 plans: 07-01 (4 min), 07-02 (2 min), 08-01 (6 min), 08-02 (3 min), 09-01 (3 min)
+- Last 5 plans: 07-02 (2 min), 08-01 (6 min), 08-02 (3 min), 09-01 (3 min), 09-02 (4 min)
 - Trend: Consistent 2-6 min per plan with established patterns
 
 *Updated after each plan completion*
@@ -96,6 +96,10 @@ Recent decisions affecting current work:
 - [09-01]: All SDL_Log error calls migrated to sdl3_report_error with callback routing and SDL_Log fallback
 - [09-01]: sdl3_report_error context strings are descriptive (e.g., "create_window", "font_load_invalid_id")
 - [09-01]: Init flag precedence: s_init_flags (from SDL3_Config) > config->video (from ECS ContextConfig) > no-op
+- [09-02]: SDL3_use(NULL) registers all providers; cels_register(SDL3_Engine) delegates to SDL3_use(NULL)
+- [09-02]: 7 individual _use() functions: Init, FrameLoop, Input, Textures, Window, Text, Renderer
+- [09-02]: FrameStateSystem placed in Window_use() (monitors window states), not FrameLoop_use()
+- [09-02]: SDL3_use() call order: Init -> FrameLoop -> Input -> Textures -> Window -> Text -> Renderer
 
 ### Pending Todos
 
@@ -110,6 +114,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-22 00:04 UTC
-Stopped at: Completed 09-01-PLAN.md (error reporting infrastructure) -- Phase 9 plan 1 of 2 done
+Last session: 2026-03-22 00:11 UTC
+Stopped at: Completed 09-02-PLAN.md (registration API) -- Phase 9 complete (2/2 plans done)
 Resume file: None
