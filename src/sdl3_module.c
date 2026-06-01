@@ -650,6 +650,7 @@ void SDL3_use(const SDL3_Config* config) {
     SDL3_Init_use();
     SDL3_FrameLoop_use();
     SDL3_Input_use();
+    SDL3_InputActions_use();    /* must follow Input -- consumes drained events */
     SDL3_Textures_use();
     SDL3_Window_use();
     SDL3_Text_use();

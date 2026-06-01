@@ -431,4 +431,169 @@ extern bool sdl3_font_load(int font_id, const char* path, float pt_size);
 extern void sdl3_font_close(int font_id);
 extern void sdl3_fonts_close_all(void);
 
+/* ============================================================================
+ * Input Actions -- typed-handle, context-scoped, polled input map
+ * ============================================================================
+ *
+ * A complete Godot-style action system layered on top of SDL3 input. Define
+ * actions as CELS compositions with binding components; poll their state
+ * each frame via lookup functions keyed on typed handles.
+ *
+ *   // Define a handle (one TU only)
+ *   #include <cels/cels.h>
+ *   CEL_InputAction(jump);
+ *
+ *   // Map keys/buttons to it via composition
+ *   CEL_Compose(MyInputMap) {
+ *       SDL3InputContext(.name = "gameplay", .active = true) {
+ *           SDL3Action(jump, .deadzone = 0.2f) {
+ *               cel_has(SDL3_KeyBinding,       .key = SDLK_SPACE);
+ *               cel_has(SDL3_PadButtonBinding, .button = SDL_GAMEPAD_BUTTON_SOUTH);
+ *           }
+ *       }
+ *   }
+ *
+ *   // Poll in a system
+ *   const SDL3_ActionState* s = sdl3_action_state(jump);
+ *   if (s && s->phase == SDL3_ACTION_PRESSED) ...
+ *
+ * Multiple bindings per action OR-combine for binary state; MAX-combine for
+ * strength; SUM with circular-deadzone unit-clamp for 2D vector.
+ */
+
+typedef struct SDL3_Vec2 { float x, y; } SDL3_Vec2;
+
+typedef enum SDL3_ActionPhase {
+    SDL3_ACTION_IDLE = 0,
+    SDL3_ACTION_PRESSED,    /* edge: idle/released -> active this frame */
+    SDL3_ACTION_HELD,
+    SDL3_ACTION_RELEASED    /* edge: active -> idle this frame */
+} SDL3_ActionPhase;
+
+/* Identifies an action by name and tunes its deadzone.
+ * context_name is the name of the SDL3_InputContext this action belongs to
+ * (set automatically by SDL3Action composition based on enclosing
+ * SDL3InputContext). NULL = global action (always active). */
+CEL_Component(SDL3_ActionConfig) {
+    const char* name;
+    const char* context_name;
+    float       deadzone;     /* 0 -> default 0.2 */
+};
+
+/* Per-action runtime state -- written by SDL3_InputActionPhaseSystem each
+ * frame, mirrored to a side-table for O(1) polled lookup. */
+CEL_Component(SDL3_ActionState) {
+    SDL3_ActionPhase phase;
+    float            strength;       /* 0..1, deadzone-aware */
+    float            raw_strength;   /* 0..1, no deadzone */
+    SDL3_Vec2        vector;         /* 2D, |v| <= 1, circular deadzone */
+    SDL3_Vec2        raw_vector;     /* 2D, raw, no deadzone */
+    bool             prev_active;    /* internal: previous frame active flag */
+};
+
+/* Bindings. Each cel_has() on an action entity attaches one binding;
+ * the resolution system OR/MAX/SUM-combines all bindings per action.
+ *
+ * Binary bindings (KeyBinding, MouseBtnBinding, PadButtonBinding) contribute
+ * 1.0 to raw_strength when held, 0.0 otherwise.
+ * Analog scalar bindings (PadAxisBinding, AxisBinding) contribute the
+ * absolute value of their axis read to raw_strength.
+ * Vector bindings (PadStickBinding, Key2DAxisBinding) contribute their
+ * (dx, dy) to raw_vector (summed; clipped to unit circle in the phase
+ * system, then circular-deadzone applied). */
+CEL_Component(SDL3_KeyBinding)        { SDL_Keycode key; };
+CEL_Component(SDL3_MouseBtnBinding)   { int button; };           /* 1=L, 2=M, 3=R */
+CEL_Component(SDL3_PadButtonBinding)  { int button; };           /* SDL_GamepadButton */
+CEL_Component(SDL3_PadAxisBinding)    { int axis; };             /* SDL_GamepadAxis */
+CEL_Component(SDL3_PadStickBinding)   { int stick; };            /* 0=left, 1=right */
+
+/* Composite scalar axis: -1 from negative_key, +1 from positive_key. */
+CEL_Component(SDL3_AxisBinding) {
+    SDL_Keycode negative_key;
+    SDL_Keycode positive_key;
+};
+
+/* Composite 2D axis (WASD or arrow-key pad). Fills .vector with
+ * circular-deadzone clamp. The neg_x2/pos_x2/neg_y2/pos_y2 fields are an
+ * optional secondary key set (leave as SDLK_UNKNOWN = 0 to disable) --
+ * use them to bind WASD AND arrow keys to the same action without needing
+ * a second component. Either set contributes -1/+1 to the vector axis. */
+CEL_Component(SDL3_Key2DAxisBinding) {
+    SDL_Keycode neg_x,  pos_x;
+    SDL_Keycode neg_y,  pos_y;
+    SDL_Keycode neg_x2, pos_x2;
+    SDL_Keycode neg_y2, pos_y2;
+};
+
+/* Input context -- groups a logical set of actions. */
+CEL_Component(SDL3_InputContext) {
+    const char* name;
+    bool        active;
+};
+
+/* Per-frame input snapshot singleton -- populated at OnLoad after SDL events
+ * are drained, read by the binding resolution systems. */
+#define SDL3_INPUT_CONTEXT_NAME_MAX 64
+CEL_Define_State(SDL3_InputFrame) {
+    bool keys_now [SDL_SCANCODE_COUNT];
+    bool keys_prev[SDL_SCANCODE_COUNT];
+
+    float    mouse_x, mouse_y;
+    uint32_t mouse_btns_now;
+    uint32_t mouse_btns_prev;
+
+    /* Active context name (empty string = no context active = all actions idle
+     * unless they have context_name == NULL). */
+    char active_context[SDL3_INPUT_CONTEXT_NAME_MAX];
+
+    /* Reflects whether SDL_EVENT_QUIT was observed since startup. */
+    bool quit_requested;
+};
+
+/* Compositions. SDL3Action takes a typed CEL_InputAction handle as its first
+ * positional argument; its .name is harvested from handle->name. */
+CEL_Define_Composition(SDL3Action,
+    const cels_action_t* handle;
+    float deadzone;
+);
+#define SDL3Action(handle_, ...) cel_init(SDL3Action, .handle = (handle_), __VA_ARGS__)
+
+CEL_Define_Composition(SDL3InputContext,
+    const char* name;
+    bool        active;
+);
+#define SDL3InputContext(...) cel_init(SDL3InputContext, __VA_ARGS__)
+
+/* Module registration. */
+extern void SDL3_InputActions_use(void);
+
+/* Polled query primitive -- returns mirror of latest resolved state for the
+ * given action name, or NULL if no action by that name has been registered.
+ * The returned pointer is valid until the next frame's phase pass overwrites
+ * it. Nucleus's nucleus_action_* wrappers call this with handle->name. */
+extern const SDL3_ActionState* sdl3_action_state(const cels_action_t* handle);
+
+/* Context switching -- replaces InputFrame.active_context with the given
+ * name (truncated to SDL3_INPUT_CONTEXT_NAME_MAX-1 chars). Pass NULL or ""
+ * to disable all context-scoped actions. */
+extern void sdl3_input_set_active_context(const char* name);
+extern const char* sdl3_input_active_context(void);
+
+/* Quit-flag accessor mirrored from SDL_EVENT_QUIT. */
+extern bool sdl3_input_quit_requested(void);
+
+/* Direct keyboard / mouse queries -- for cases where defining an action is
+ * overkill (debug-quit shortcuts, mouse hover/drag, etc.). All read from
+ * the per-frame InputFrame snapshot, so they require SDL3_InputActions_use()
+ * to have been registered. */
+extern bool  sdl3_key_pressed (SDL_Keycode key);
+extern bool  sdl3_key_held    (SDL_Keycode key);
+extern bool  sdl3_key_released(SDL_Keycode key);
+
+extern float sdl3_mouse_x(void);
+extern float sdl3_mouse_y(void);
+extern bool  sdl3_mouse_pressed (int button);
+extern bool  sdl3_mouse_held    (int button);
+extern bool  sdl3_mouse_released(int button);
+
 #endif /* CELS_SDL3_H */
