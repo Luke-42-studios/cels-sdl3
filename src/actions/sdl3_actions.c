@@ -64,11 +64,23 @@ static bool         s_gamepad_subsys_init = false;
  * Helpers
  * ============================================================================ */
 
+/* The compare bound below must never exceed the backing array's size, or the
+ * strncmp could over-read SDL3_InputFrame.active_context. */
+_Static_assert(sizeof(((struct SDL3_InputFrame*)0)->active_context)
+                   >= SDL3_INPUT_CONTEXT_NAME_MAX,
+               "active_context buffer smaller than SDL3_INPUT_CONTEXT_NAME_MAX");
+
 static bool action_context_active(const char* action_ctx)
 {
     if (action_ctx == NULL || action_ctx[0] == '\0') return true;
+    /* Compare only NAME_MAX-1 bytes: sdl3_input_set_active_context() truncates
+     * the active context to NAME_MAX-1, so comparing the full NAME_MAX bytes
+     * against an untruncated config name would make a long-named context never
+     * match its own truncated active form — silently disabling all its actions.
+     * Bounding the compare to the same NAME_MAX-1 prefix keeps the two sides
+     * consistent. */
     return strncmp(action_ctx, SDL3_InputFrame.active_context,
-                   SDL3_INPUT_CONTEXT_NAME_MAX) == 0;
+                   SDL3_INPUT_CONTEXT_NAME_MAX - 1) == 0;
 }
 
 static float clampf(float v, float lo, float hi)
