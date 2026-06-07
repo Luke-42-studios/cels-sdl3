@@ -453,13 +453,6 @@ CEL_Composition(SDL3Action) {
 
     cels_entity_t self = cels_get_current_entity();
 
-    /* Survive parent recomposition. Without this, when a parent that hosts
-     * the input map recomposes (e.g. a Compose-style view that
-     * cel_watch'es some state), the mark-and-sweep at the end of the
-     * parent's recomposition reaps this action entity. The user feels it
-     * as "input stopped working after a state change". */
-    cels_mark_lifecycled_root(self);
-
     /* cel_has overwrites component data on every call. Unguarded
      * cel_has(SDL3_ActionState, .phase = IDLE) on every recomposition
      * would wipe prev_active and break the pressed/held/released edge
