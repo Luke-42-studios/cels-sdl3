@@ -257,6 +257,21 @@ CEL_System(SDL3_InputActionResetSystem, .phase = OnLoad) {
     }
 }
 
+/* OQ-1: Multi-binding strength combination — MAX, not SUM.
+ *
+ * When multiple bindings are attached to the same action entity (e.g. both
+ * SDLK_SPACE and SDL_GAMEPAD_BUTTON_SOUTH bound to "jump"), each binding
+ * system writes:
+ *
+ *   raw_strength = maxf(raw_strength, <this_binding_contribution>)
+ *
+ * This means holding keyboard + gamepad simultaneously keeps raw_strength at
+ * 1.0, not 2.0.  The same maxf pattern applies in every binary binding system
+ * (3a-3c below) and the analog systems (3d-3g).  There is no double-counting.
+ *
+ * The multi-binding OR-strength / MAX-magnitude / circular-clipped-vector-sum
+ * contract is documented in nucleus_input.h's polled-API doc block. */
+
 /* 3a. Keyboard binding -> binary strength. */
 CEL_System(SDL3_InputKeyBindingSystem, .phase = OnLoad) {
     cel_query(SDL3_ActionConfig, SDL3_ActionState, SDL3_KeyBinding);
@@ -370,6 +385,39 @@ CEL_System(SDL3_InputKey2DAxisBindingSystem, .phase = OnLoad) {
         }
     }
 }
+
+/* OQ-2: Deadzone remap for binary inputs (keyboard, mouse button, pad button).
+ *
+ * The cooked strength formula (Godot-compatible) is:
+ *
+ *   s = rs < dz ? 0.0f : (rs - dz) / (1.0f - dz)
+ *
+ * where rs = raw_strength and dz = deadzone (default 0.2f per OQ below).
+ *
+ * For binary inputs (keyboard, mouse button, pad button): raw_strength = 1.0f.
+ * With the default dz = 0.2f:
+ *
+ *   s = (1.0f - 0.2f) / (1.0f - 0.2f) = 1.0f
+ *
+ * Binary inputs produce cooked strength 1.0 regardless of the deadzone value
+ * (as long as dz < 1.0).  The deadzone only attenuates analog inputs whose
+ * raw_strength falls between 0 and 1 — it removes hardware-drift noise near
+ * the zero crossing.  A raw_strength < dz (e.g. a stick resting at 0.1) is
+ * zeroed; raw_strength above dz is linearly remapped to [0, 1].
+ *
+ * OQ-3: Circular deadzone applied to raw_vector regardless of binding source.
+ *
+ * The phase system applies the same circular deadzone to SDL3_ActionState's
+ * raw_vector whether the contribution came from a pad stick (SDL3_PadStickBinding)
+ * or a keyboard composite (SDL3_Key2DAxisBinding / WASD).
+ *
+ * Keyboard-composite diagonal (W + D both held): dx=1, dy=1 → |v|=1.414.
+ * The unit-circle clip (mag > 1.0f → vx /= mag; vy /= mag) brings it to
+ * |v|=1.0 BEFORE the deadzone remap.  So nucleus_action_vec2() returns exactly
+ * |v|=1.0 for diagonals — checklist item 4 in the input-demo.  The deadzone
+ * remap then scales the magnitude with the same (mag - dz)/(1 - dz) formula
+ * used for scalars.  The direction vector is preserved; only the magnitude
+ * changes. */
 
 /* 4. Apply deadzone + derive phase + mirror to side table.
  *
