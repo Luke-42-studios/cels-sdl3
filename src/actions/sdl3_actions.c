@@ -479,8 +479,28 @@ CEL_Composition(SDL3Action) {
 CEL_Composition(SDL3InputContext) {
     if (cel.name == NULL) return;  /* phantom-registration guard */
 
-    /* Same rationale as SDL3Action -- survive parent recomposition. */
-    cels_mark_lifecycled_root(cels_get_current_entity());
+    /* Option B (HYG-07 / ticket 040): fire a hard error when this composition
+     * is entered during a recomposition pass.  The recompose path re-runs this
+     * body, which resets s_compose_context and may re-register bindings --
+     * silently breaking edge-detection for every action in the context (symptoms
+     * 1-3 in ticket 040).
+     *
+     * Workaround: put the input map in a parent composition that NEVER calls
+     * cel_watch (so it is never dirty-queued for recompose), and let the
+     * reactive UI live in a cel_watch-ing child.  See the TodoApp / TodoList
+     * split in examples/todo/main.c and the doc block in nucleus_input.h. */
+    if (cels_is_recomposing()) {
+        cels_error_raise(CELS_ERROR_ILLEGAL_OPERATION,
+            "NucleusInputContext cannot live inside a composition that "
+            "cel_watches state. Split: input map in a parent (no cel_watch), "
+            "reactive UI in a child. See examples/todo/main.c TodoApp/TodoList "
+            "and nucleus_input.h.");
+    }
+
+    /* The manual lifecycle-root tag that used to live here was the 9th (last)
+     * in-body site from ticket 035.  It was removed because the _cel_compose_impl
+     * macro (plan 01-01) now auto-tags CELS_LIFECYCLED_ROOT when no .lifecycle is
+     * declared at the call site.  The SDL3Action site was removed in plan 01-02. */
 
     cel_has(SDL3_InputContext, .name = cel.name, .active = cel.active);
 

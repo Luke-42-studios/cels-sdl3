@@ -133,4 +133,7 @@ if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
         ${CMAKE_CURRENT_SOURCE_DIR}/examples/assets
         $<TARGET_FILE_DIR:demo>/assets
     )
+
+    # Tests (HYG-07 recompose reproducer and future additions)
+    add_subdirectory(tests)
 endif()
