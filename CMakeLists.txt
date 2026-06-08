@@ -1,7 +1,7 @@
 # cels-sdl3 - SDL3-based providers for CELS framework
 # INTERFACE library: sources compile in the consumer's context
 cmake_minimum_required(VERSION 3.21)
-project(cels-sdl3 VERSION 0.2.1 LANGUAGES C)
+project(cels-sdl3 VERSION 0.2.2 LANGUAGES C)
 
 # ============================================================================
 # Dependencies
