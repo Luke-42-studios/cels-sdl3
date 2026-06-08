@@ -82,6 +82,7 @@ target_link_libraries(cels-sdl3 INTERFACE
     SDL3_image::SDL3_image
     SDL3_ttf::SDL3_ttf
     cels
+    m
 )
 
 # ============================================================================
