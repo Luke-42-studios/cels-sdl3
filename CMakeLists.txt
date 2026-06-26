@@ -3,6 +3,11 @@
 cmake_minimum_required(VERSION 3.21)
 project(cels-sdl3 VERSION 0.2.2 LANGUAGES C)
 
+# Vendor CPM — shared dependency cache: export CPM_SOURCE_CACHE=$HOME/.cache/CPM
+if(NOT COMMAND CPMAddPackage)
+    include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/CPM.cmake)
+endif()
+
 # ============================================================================
 # Dependencies
 # ============================================================================
