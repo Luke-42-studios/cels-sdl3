@@ -14,8 +14,8 @@ endif()
 # cels-sdl3 is an addon library -- the consumer must provide cels.
 # Typical consumer CMakeLists.txt:
 #
-#   CPMAddPackage(NAME cels      GITHUB_REPOSITORY Luke-42-studios/cels      GIT_TAG v0.6.1)
-#   CPMAddPackage(NAME cels-sdl3 GITHUB_REPOSITORY Luke-42-studios/cels-sdl3 GIT_TAG v0.2.2)
+#   CPMAddPackage(NAME cels      GITHUB_REPOSITORY Luke-42-studios/cels      GIT_TAG v0.7)
+#   CPMAddPackage(NAME cels-sdl3 GITHUB_REPOSITORY Luke-42-studios/cels-sdl3 GIT_TAG master)
 #
 #   target_link_libraries(your_app PRIVATE cels cels-sdl3)
 #
@@ -27,7 +27,7 @@ if(NOT TARGET cels)
     CPMAddPackage(
         NAME cels
         GITHUB_REPOSITORY Luke-42-studios/cels
-        GIT_TAG v0.6.1
+        GIT_TAG v0.7
     )
 endif()
 
