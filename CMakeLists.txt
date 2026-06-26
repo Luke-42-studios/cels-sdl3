@@ -14,51 +14,40 @@ endif()
 # cels-sdl3 is an addon library -- the consumer must provide cels.
 # Typical consumer CMakeLists.txt:
 #
-#   FetchContent_Declare(cels
-#       GIT_REPOSITORY https://github.com/42-Galaxies/cels.git
-#       GIT_TAG        v0.5.3)
-#   FetchContent_Declare(cels-sdl3
-#       GIT_REPOSITORY https://github.com/42-Galaxies/cels-sdl3.git
-#       GIT_TAG        v0.1.0)
-#   FetchContent_MakeAvailable(cels cels-sdl3)
+#   CPMAddPackage(NAME cels      GITHUB_REPOSITORY Luke-42-studios/cels      GIT_TAG v0.6.1)
+#   CPMAddPackage(NAME cels-sdl3 GITHUB_REPOSITORY Luke-42-studios/cels-sdl3 GIT_TAG v0.2.2)
 #
 #   target_link_libraries(your_app PRIVATE cels cels-sdl3)
 #
+# Local-dev sibling override (replaces the trap):
+#   cmake -S . -B build -DCPM_cels_SOURCE=../cels
+#
+# cels -- first-party dep; caller may override via -DCPM_cels_SOURCE=../cels
 if(NOT TARGET cels)
-    if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
-        # Top-level build (development) -- use sibling cels directory
-        # Point FetchContent at cels's already-downloaded deps to avoid network clones
-        set(FETCHCONTENT_SOURCE_DIR_FLECS
-            "${CMAKE_CURRENT_SOURCE_DIR}/../cels/cmake-build-debug/_deps/flecs-src" CACHE PATH "")
-        set(FETCHCONTENT_SOURCE_DIR_YYJSON
-            "${CMAKE_CURRENT_SOURCE_DIR}/../cels/cmake-build-debug/_deps/yyjson-src" CACHE PATH "")
-        add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../cels cels)
-    else()
-        message(FATAL_ERROR
-            "cels-sdl3 requires the 'cels' target. "
-            "Add cels via FetchContent or add_subdirectory before cels-sdl3.")
-    endif()
+    CPMAddPackage(
+        NAME cels
+        GITHUB_REPOSITORY Luke-42-studios/cels
+        GIT_TAG v0.6.1
+    )
 endif()
 
-# SDL3 ecosystem -- FetchContent only (no system package fallback)
-include(FetchContent)
-
-FetchContent_Declare(SDL3
-    GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
-    GIT_TAG        release-3.4.2
-    GIT_SHALLOW    TRUE
+# SDL3 ecosystem -- non-semver tags require explicit GIT_TAG (not gh: shorthand)
+# Override locally: -DCPM_SDL3_SOURCE=<path>; shared cache: export CPM_SOURCE_CACHE=$HOME/.cache/CPM
+CPMAddPackage(
+    NAME SDL3
+    GITHUB_REPOSITORY libsdl-org/SDL
+    GIT_TAG release-3.4.2
 )
-FetchContent_Declare(SDL3_image
-    GIT_REPOSITORY https://github.com/libsdl-org/SDL_image.git
-    GIT_TAG        release-3.4.0
-    GIT_SHALLOW    TRUE
+CPMAddPackage(
+    NAME SDL3_image
+    GITHUB_REPOSITORY libsdl-org/SDL_image
+    GIT_TAG release-3.4.0
 )
-FetchContent_Declare(SDL3_ttf
-    GIT_REPOSITORY https://github.com/libsdl-org/SDL_ttf.git
-    GIT_TAG        release-3.2.2
-    GIT_SHALLOW    TRUE
+CPMAddPackage(
+    NAME SDL3_ttf
+    GITHUB_REPOSITORY libsdl-org/SDL_ttf
+    GIT_TAG release-3.2.2
 )
-FetchContent_MakeAvailable(SDL3 SDL3_image SDL3_ttf)
 
 # ============================================================================
 # INTERFACE library target
