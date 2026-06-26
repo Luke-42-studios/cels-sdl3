@@ -2,3 +2,9 @@ build/
 cmake-build-debug/
 cmake-build-release/
 .idea/
+
+# Build output (CMake presets: out/=build tree, bin/=executables)
+/out/
+/bin/
+/cmake-build-*/
+/.idea/
