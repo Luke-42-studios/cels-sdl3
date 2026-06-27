@@ -80,7 +80,14 @@ target_include_directories(cels-sdl3 INTERFACE
 
 if(EMSCRIPTEN)
     # Port-flag bypass: no from-source SDL3 fetch on WASM; ports are activated
-    # at link time via these flags rather than by linking SDL3::SDL3 targets.
+    # via both compile and link flags:
+    #   compile: tells emcc to expose the port's sysroot headers (SDL3/SDL.h etc.)
+    #   link:    tells emcc to bundle the port libraries into the output
+    target_compile_options(cels-sdl3 INTERFACE
+        -sUSE_SDL=3
+        -sUSE_SDL_IMAGE=3
+        -sUSE_SDL_TTF=3
+    )
     target_link_options(cels-sdl3 INTERFACE
         -sUSE_SDL=3
         -sUSE_SDL_IMAGE=3
