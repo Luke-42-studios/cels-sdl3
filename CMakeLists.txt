@@ -33,21 +33,28 @@ endif()
 
 # SDL3 ecosystem -- non-semver tags require explicit GIT_TAG (not gh: shorthand)
 # Override locally: -DCPM_SDL3_SOURCE=<path>; shared cache: export CPM_SOURCE_CACHE=$HOME/.cache/CPM
-CPMAddPackage(
-    NAME SDL3
-    GITHUB_REPOSITORY libsdl-org/SDL
-    GIT_TAG release-3.4.2
-)
-CPMAddPackage(
-    NAME SDL3_image
-    GITHUB_REPOSITORY libsdl-org/SDL_image
-    GIT_TAG release-3.4.0
-)
-CPMAddPackage(
-    NAME SDL3_ttf
-    GITHUB_REPOSITORY libsdl-org/SDL_ttf
-    GIT_TAG release-3.2.2
-)
+#
+# Emscripten provides SDL3/SDL3_image/SDL3_ttf via built-in ports; building from
+# source conflicts with the port system. On WASM we skip the CPM fetch entirely
+# and attach port flags so the consumer's link step activates the ports.
+# On all other platforms the CPM path is byte-identical to what it was before.
+if(NOT EMSCRIPTEN)
+    CPMAddPackage(
+        NAME SDL3
+        GITHUB_REPOSITORY libsdl-org/SDL
+        GIT_TAG release-3.4.2
+    )
+    CPMAddPackage(
+        NAME SDL3_image
+        GITHUB_REPOSITORY libsdl-org/SDL_image
+        GIT_TAG release-3.4.0
+    )
+    CPMAddPackage(
+        NAME SDL3_ttf
+        GITHUB_REPOSITORY libsdl-org/SDL_ttf
+        GIT_TAG release-3.2.2
+    )
+endif()
 
 # ============================================================================
 # INTERFACE library target
@@ -71,10 +78,22 @@ target_include_directories(cels-sdl3 INTERFACE
     ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
+if(EMSCRIPTEN)
+    # Port-flag bypass: no from-source SDL3 fetch on WASM; ports are activated
+    # at link time via these flags rather than by linking SDL3::SDL3 targets.
+    target_link_options(cels-sdl3 INTERFACE
+        -sUSE_SDL=3
+        -sUSE_SDL_IMAGE=3
+        -sUSE_SDL_TTF=3
+    )
+else()
+    target_link_libraries(cels-sdl3 INTERFACE
+        SDL3::SDL3
+        SDL3_image::SDL3_image
+        SDL3_ttf::SDL3_ttf
+    )
+endif()
 target_link_libraries(cels-sdl3 INTERFACE
-    SDL3::SDL3
-    SDL3_image::SDL3_image
-    SDL3_ttf::SDL3_ttf
     cels
     m
 )
