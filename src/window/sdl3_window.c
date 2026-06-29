@@ -9,6 +9,9 @@
 #include <cels_sdl3.h>
 #include "../sdl3_internal.h"
 #include <SDL3/SDL.h>
+#ifdef NUCLEUS_WINDOW_DEBUG_COUNT
+#include <stdio.h>
+#endif
 
 void sdl3_window_create(cels_entity_t entity,
                          const SDL3_WindowConfig* config,
@@ -25,6 +28,9 @@ void sdl3_window_create(cels_entity_t entity,
         flags |= SDL_WINDOW_RESIZABLE;
     }
 
+#ifdef NUCLEUS_WINDOW_DEBUG_COUNT
+    { static int g_n = 0; fprintf(stderr, "nucleus: SDL_CreateWindow #%d\n", ++g_n); }
+#endif
     SDL_Window* window = SDL_CreateWindow(title, w, h, flags);
     if (!window) {
         sdl3_report_error("create_window");

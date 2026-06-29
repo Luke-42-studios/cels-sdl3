@@ -549,7 +549,12 @@ CEL_Composition(SDL3InputContext) {
      * cel_watch (so it is never dirty-queued for recompose), and let the
      * reactive UI live in a cel_watch-ing child.  See the TodoApp / TodoList
      * split in examples/todo/main.c and the doc block in nucleus_input.h. */
-    if (cels_is_recomposing()) {
+    /* A hot-reload rebinds the root factory and recomposes the WHOLE root subtree
+     * (the input map included), so this body is legitimately re-entered during a
+     * reload recompose -- re-running it simply rewires the input map to the new
+     * code. Only a REACTIVE (cel_watch-driven) recompose indicates the misuse this
+     * guard targets, so suppress the error during a reload recompose. */
+    if (cels_is_recomposing() && !cels_is_reloading()) {
         cels_error_raise(CELS_ERROR_ILLEGAL_OPERATION,
             "NucleusInputContext cannot live inside a composition that "
             "cel_watches state. Split: input map in a parent (no cel_watch), "
